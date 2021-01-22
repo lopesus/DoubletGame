@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using CommonLibTools;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
 
@@ -49,7 +50,7 @@ namespace WiktionaireParser
             InitializeComponent();
 
             PagesList = collection.Find(FilterDefinition<WikiPage>.Empty).Skip(10000).Limit(10000)
-                .Sort(Builders<WikiPage>.Sort.Ascending(p=>p.Title))
+                .Sort(Builders<WikiPage>.Sort.Ascending(p => p.Title))
                 .ToList();
 
             lbxPages.ItemsSource = PagesList;
@@ -127,7 +128,7 @@ namespace WiktionaireParser
                                 }
                             }
 
-                           
+
                         }
                         catch (Exception e)
                         {
@@ -157,11 +158,10 @@ namespace WiktionaireParser
         private async void cmdTrouverMot_Click(object sender, RoutedEventArgs e)
         {
             var mot = txtMot.Text.Trim();
-            if (true)
+            if (mot.IsEmptyString() == false)
             {
 
-                var results = await collection.Find(x => x.Title == mot).Limit(1).ToListAsync();
-                var  page = results.FirstOrDefault();
+                var page = await collection.Find(x => x.Title == mot).FirstAsync();//.Limit(1).ToListAsync();
                 txtPages.Text = page.Text;
 
                 //var filter= Builders<WikiPage>.Filter.Eq(p => p.Title, mot);
