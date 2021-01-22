@@ -1,0 +1,48 @@
+﻿<Window x:Class="WiktionaireParser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WiktionaireParser"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
+    <Grid>
+        <TabControl>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="203*"/>
+                        <ColumnDefinition Width="591*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4*"/>
+                        <RowDefinition Height="25*"/>
+                    </Grid.RowDefinitions>
+                    <ListBox x:Name="lbxPages" Grid.Row="1" Margin="5,5,5,5" SelectionChanged="lbxPages_SelectionChanged"/>
+                    <TextBox x:Name="txtPages" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
+                    <StackPanel Grid.Column="1" Background="#FFCB8787" Orientation="Horizontal">
+                        <TextBox x:Name="txtMot" Height="33" TextWrapping="Wrap" Width="118" Margin="5,5,5,5"/>
+                        <Button x:Name="cmdTrouverMot" Content="Chercher" Height="32" Width="105" Margin="5,5,5,5" Click="cmdTrouverMot_Click"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="ParseDump" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="68*"/>
+                        <ColumnDefinition Width="329*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="53*"/>
+                        <RowDefinition Height="353*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="cmdParseDump" Content="Parse Dump" HorizontalAlignment="Left" Height="33" Margin="30,0,0,0" VerticalAlignment="Center" Width="72" Click="cmdParseDump_Click"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>
