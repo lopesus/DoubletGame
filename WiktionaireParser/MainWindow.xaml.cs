@@ -34,6 +34,8 @@ namespace WiktionaireParser
         private IMongoCollection<WikiPage> collection;
         private int Take = Int32.MaxValue;
         private string collectionName;
+        int pageToLoadFromDb = Int32.MaxValue;
+        int pageToSkipFromDb = 0;
 
         public MainWindow()
         {
@@ -49,14 +51,38 @@ namespace WiktionaireParser
 
             InitializeComponent();
 
-            PagesList = collection.Find(FilterDefinition<WikiPage>.Empty).Skip(10000).Limit(10000)
+            LoadPagesFromDb();
+        }
+
+        private void LoadPagesFromDb()
+        {
+            PagesList = collection.Find(FilterDefinition<WikiPage>.Empty).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
                 .Sort(Builders<WikiPage>.Sort.Ascending(p => p.Title))
                 .ToList();
 
             lbxPages.ItemsSource = PagesList;
-
         }
+        private void cmdSerachFilter_Click(object sender, RoutedEventArgs e)
+        {
+            bool isVerb = chkVerb.IsChecked ?? false;
+            bool hasAntonym = chkAnto.IsChecked ?? false;
+            bool hasSinonym = chkSino.IsChecked ?? false;
 
+
+            FilterDefinition<WikiPage> verbFilter;
+            verbFilter = isVerb ? Builders<WikiPage>.Filter.Eq(p => p.IsVerb, true) : FilterDefinition<WikiPage>.Empty;
+            var antonymFilter = hasAntonym ? Builders<WikiPage>.Filter.Eq(p => p.HasAntonymes, true) : FilterDefinition<WikiPage>.Empty;
+            var sinonymFilter = hasSinonym ? Builders<WikiPage>.Filter.Eq(p => p.HasSinonymes, true) : FilterDefinition<WikiPage>.Empty;
+
+
+
+            PagesList = collection.Find(antonymFilter & sinonymFilter & verbFilter).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
+                .Sort(Builders<WikiPage>.Sort.Ascending(p => p.Title))
+                .ToList();
+
+            lbxPages.ItemsSource = PagesList;
+            tblCount.Text = $"found {PagesList.Count}";
+        }
         public void ParseWikiDump()
         {
             database.DropCollection(collectionName);
@@ -65,6 +91,7 @@ namespace WiktionaireParser
             SplitDicoToPage();
             SaveToDB(PagesList);
             MessageBox.Show("Parse Wiki Dump");
+            LoadPagesFromDb();
         }
         private async void SetDbIndex()
         {
@@ -72,7 +99,10 @@ namespace WiktionaireParser
             var indexDefinition = Builders<WikiPage>.IndexKeys.Combine(
                 Builders<WikiPage>.IndexKeys.Ascending(f => f.Title),
                 Builders<WikiPage>.IndexKeys.Ascending(f => f.Len),
-                Builders<WikiPage>.IndexKeys.Ascending(f => f.IsVerb));
+                Builders<WikiPage>.IndexKeys.Ascending(f => f.IsVerb),
+                Builders<WikiPage>.IndexKeys.Ascending(f => f.HasAntonymes),
+                Builders<WikiPage>.IndexKeys.Ascending(f => f.HasSinonymes)
+                );
 
             CreateIndexModel<WikiPage> indexModel = new CreateIndexModel<WikiPage>(indexDefinition);
 
@@ -116,15 +146,30 @@ namespace WiktionaireParser
                             var nodeList = document.GetElementsByTagName("title");
                             title = nodeList[0].InnerText.Trim();
 
-                            if (char.IsLetter(title[0]))
+                            if (title == "infarcir")
+                            {
+                                Console.WriteLine();
+                            }
+                            var firstChar = title[0];
+                            if (char.IsLetter(firstChar)
+                                && char.IsUpper(firstChar) == false
+                                && title.Contains("-") == false && title.Contains(" ") == false
+                                )
                             {
                                 nodeList = document.GetElementsByTagName("text");
                                 text = nodeList[0].InnerText.Trim();
 
-                                if (text.StartsWith("{{voir") || text.StartsWith("== {{langue|fr}} =="))
+                                if (text.StartsWith("{{voir") || RegexLib.StartWithLangSectionRegex.IsMatch(text))
                                 {
-                                    var wikiPage = new WikiPage(title, text);
-                                    PagesList.Add(wikiPage);
+                                    if (RegexLib.ContainsLangSectionRegex.IsMatch(text))
+                                    {
+                                        var wikiPage = new WikiPage(title, text);
+                                        if (wikiPage.IsOnlyVerbFlexion() == false)
+                                        {
+                                            PagesList.Add(wikiPage);
+                                        }
+                                    }
+
                                 }
                             }
 
@@ -147,7 +192,13 @@ namespace WiktionaireParser
         private void lbxPages_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var page = lbxPages.SelectedItem as WikiPage;
-            if (page != null) txtPages.Text = page.Text;
+            if (page != null)
+            {
+                txtPageLangText.Text = page.LangText;
+                txtAllPageText.Text = page.Text;
+                txtAntonymes.Text = page.Antonymes;
+                txtSynonymes.Text = page.Sinonymes;
+            }
         }
 
         private void cmdParseDump_Click(object sender, RoutedEventArgs e)
@@ -160,12 +211,26 @@ namespace WiktionaireParser
             var mot = txtMot.Text.Trim();
             if (mot.IsEmptyString() == false)
             {
+                try
+                {
+                    var page = await collection.Find(x => x.Title == mot).FirstAsync();//.Limit(1).ToListAsync();
+                    txtAllPageText.Text = page.Text;
+                    txtPageLangText.Text = page.LangText;
 
-                var page = await collection.Find(x => x.Title == mot).FirstAsync();//.Limit(1).ToListAsync();
-                txtPages.Text = page.Text;
+                    txtAntonymes.Text = page.Antonymes;
+                    txtSynonymes.Text = page.Sinonymes;
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                    txtPageLangText.Text = exception.Message;
+                }
+
 
                 //var filter= Builders<WikiPage>.Filter.Eq(p => p.Title, mot);
             }
         }
+
+
     }
 }

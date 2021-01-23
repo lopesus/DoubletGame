@@ -11,19 +11,52 @@
             <TabItem Header="TabItem">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="203*"/>
-                        <ColumnDefinition Width="591*"/>
+                        <ColumnDefinition Width="203"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="4*"/>
-                        <RowDefinition Height="25*"/>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="31*"/>
+                        <RowDefinition Height="19*"/>
                     </Grid.RowDefinitions>
-                    <ListBox x:Name="lbxPages" Grid.Row="1" Margin="5,5,5,5" SelectionChanged="lbxPages_SelectionChanged"/>
-                    <TextBox x:Name="txtPages" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
+                    <ListBox x:Name="lbxPages" Grid.Row="1" Margin="5,5,5,5" SelectionChanged="lbxPages_SelectionChanged" Grid.RowSpan="2"/>
                     <StackPanel Grid.Column="1" Background="#FFCB8787" Orientation="Horizontal">
                         <TextBox x:Name="txtMot" Height="33" TextWrapping="Wrap" Width="118" Margin="5,5,5,5"/>
                         <Button x:Name="cmdTrouverMot" Content="Chercher" Height="32" Width="105" Margin="5,5,5,5" Click="cmdTrouverMot_Click"/>
                     </StackPanel>
+                    <TextBox x:Name="txtPageLangText" Grid.Column="1" Grid.Row="1" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
+                    <TextBox x:Name="txtAllPageText" Grid.Column="1" Grid.Row="2" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
+                    <Grid Grid.Column="2" Grid.RowSpan="2" Grid.Row="1" Background="#FFB6DAB8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="96"/>
+                            <RowDefinition Height="Auto" MinHeight="26"/>
+                            <RowDefinition Height="130"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="txtAntonymes" Grid.Row="1" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5"/>
+                        <TextBox x:Name="txtSynonymes" Grid.Row="3" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5"/>
+                        <TextBlock Text="antonymes" TextWrapping="Wrap" Margin="5,5,5,5"/>
+                        <TextBlock Grid.Row="2" Text="synonymes" TextWrapping="Wrap" Margin="5,5,5,5"/>
+                    </Grid>
+                    <Grid Background="#FF7DB8CF">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="2*"/>
+                            <RowDefinition Height="3*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="93*"/>
+                            <ColumnDefinition Width="110*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox x:Name="chkAnto" Content="antonym" Margin="5,5,5,5"/>
+                        <CheckBox x:Name="chkSino" Content="sinonymes" Grid.Row="1" Margin="5,5,5,5"/>
+                        <CheckBox x:Name="chkVerb" Content="is verb" Grid.Column="1" Margin="5,5,5,5"/>
+                        <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="1" Grid.Row="3" Click="cmdSerachFilter_Click"/>
+                        <TextBlock x:Name="tblCount" Grid.Row="3" Text="TextBlock" TextWrapping="Wrap"/>
+                    </Grid>
                 </Grid>
             </TabItem>
             <TabItem Header="TabItem">
