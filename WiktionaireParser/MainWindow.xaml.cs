@@ -51,6 +51,11 @@ namespace WiktionaireParser
 
             InitializeComponent();
 
+            var len=new List<int>();
+
+            cbxLength.ItemsSource=  Enumerable.Range(0, 10);//.Select(x => x * x);
+            cbxLength.SelectedIndex = 5;
+
             LoadPagesFromDb();
         }
 
@@ -67,16 +72,18 @@ namespace WiktionaireParser
             bool isVerb = chkVerb.IsChecked ?? false;
             bool hasAntonym = chkAnto.IsChecked ?? false;
             bool hasSinonym = chkSino.IsChecked ?? false;
+            int len = cbxLength.SelectedIndex ;
 
 
             FilterDefinition<WikiPage> verbFilter;
             verbFilter = isVerb ? Builders<WikiPage>.Filter.Eq(p => p.IsVerb, true) : FilterDefinition<WikiPage>.Empty;
             var antonymFilter = hasAntonym ? Builders<WikiPage>.Filter.Eq(p => p.HasAntonymes, true) : FilterDefinition<WikiPage>.Empty;
             var sinonymFilter = hasSinonym ? Builders<WikiPage>.Filter.Eq(p => p.HasSinonymes, true) : FilterDefinition<WikiPage>.Empty;
+            var lengthFilter = len>0 ? Builders<WikiPage>.Filter.Eq(p => p.Len, len) : FilterDefinition<WikiPage>.Empty;
 
 
 
-            PagesList = collection.Find(antonymFilter & sinonymFilter & verbFilter).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
+            PagesList = collection.Find(antonymFilter & sinonymFilter & verbFilter & lengthFilter).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
                 .Sort(Builders<WikiPage>.Sort.Ascending(p => p.Title))
                 .ToList();
 

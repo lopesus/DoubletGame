@@ -20,11 +20,36 @@
                         <RowDefinition Height="31*"/>
                         <RowDefinition Height="19*"/>
                     </Grid.RowDefinitions>
+                    <Grid Grid.ColumnSpan="3" Background="#FF69A463">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="171*"/>
+                            <ColumnDefinition Width="226*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid x:Name="filterGrid" Background="#FF7DB8CF">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="2*"/>
+                                <RowDefinition Height="3*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="118"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="chkAnto" Content="antonym" Margin="5,5,5,5"/>
+                            <CheckBox x:Name="chkSino" Content="sinonymes" Grid.Row="1" Margin="5,5,5,5"/>
+                            <CheckBox x:Name="chkVerb" Content="is verb" Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="2"/>
+                            <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="1" Grid.Row="2" Click="cmdSerachFilter_Click" Margin="0,20,0,0" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+                            <TextBlock x:Name="tblCount" Grid.Row="2" Text="TextBlock" TextWrapping="Wrap" Margin="0,20,0,0" Grid.RowSpan="2"/>
+                            <ComboBox x:Name="cbxLength" Grid.Column="2"/>
+                        </Grid>
+                        <StackPanel Background="#FFCB8787" Orientation="Horizontal" Grid.Column="1">
+                            <TextBox x:Name="txtMot" Height="33" TextWrapping="Wrap" Width="118" Margin="5,5,5,5"/>
+                            <Button x:Name="cmdTrouverMot" Content="Chercher" Height="32" Width="105" Margin="5,5,5,5" Click="cmdTrouverMot_Click"/>
+                        </StackPanel>
+                    </Grid>
                     <ListBox x:Name="lbxPages" Grid.Row="1" Margin="5,5,5,5" SelectionChanged="lbxPages_SelectionChanged" Grid.RowSpan="2"/>
-                    <StackPanel Grid.Column="1" Background="#FFCB8787" Orientation="Horizontal">
-                        <TextBox x:Name="txtMot" Height="33" TextWrapping="Wrap" Width="118" Margin="5,5,5,5"/>
-                        <Button x:Name="cmdTrouverMot" Content="Chercher" Height="32" Width="105" Margin="5,5,5,5" Click="cmdTrouverMot_Click"/>
-                    </StackPanel>
                     <TextBox x:Name="txtPageLangText" Grid.Column="1" Grid.Row="1" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
                     <TextBox x:Name="txtAllPageText" Grid.Column="1" Grid.Row="2" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
                     <Grid Grid.Column="2" Grid.RowSpan="2" Grid.Row="1" Background="#FFB6DAB8">
@@ -39,23 +64,6 @@
                         <TextBox x:Name="txtSynonymes" Grid.Row="3" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5"/>
                         <TextBlock Text="antonymes" TextWrapping="Wrap" Margin="5,5,5,5"/>
                         <TextBlock Grid.Row="2" Text="synonymes" TextWrapping="Wrap" Margin="5,5,5,5"/>
-                    </Grid>
-                    <Grid Background="#FF7DB8CF">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="2*"/>
-                            <RowDefinition Height="3*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="93*"/>
-                            <ColumnDefinition Width="110*"/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox x:Name="chkAnto" Content="antonym" Margin="5,5,5,5"/>
-                        <CheckBox x:Name="chkSino" Content="sinonymes" Grid.Row="1" Margin="5,5,5,5"/>
-                        <CheckBox x:Name="chkVerb" Content="is verb" Grid.Column="1" Margin="5,5,5,5"/>
-                        <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="1" Grid.Row="3" Click="cmdSerachFilter_Click"/>
-                        <TextBlock x:Name="tblCount" Grid.Row="3" Text="TextBlock" TextWrapping="Wrap"/>
                     </Grid>
                 </Grid>
             </TabItem>
