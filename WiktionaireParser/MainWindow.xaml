@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WiktionaireParser"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
+        Title="MainWindow" Height="924" Width="800" WindowState="Maximized">
     <Grid>
         <TabControl>
             <TabItem Header="TabItem">
@@ -16,7 +16,7 @@
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="200"/>
                         <RowDefinition Height="31*"/>
                         <RowDefinition Height="19*"/>
                     </Grid.RowDefinitions>
@@ -29,20 +29,25 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="2*"/>
-                                <RowDefinition Height="3*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="100"/>
                                 <ColumnDefinition Width="118"/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <CheckBox x:Name="chkAnto" Content="antonym" Margin="5,5,5,5"/>
                             <CheckBox x:Name="chkSino" Content="sinonymes" Grid.Row="1" Margin="5,5,5,5"/>
                             <CheckBox x:Name="chkVerb" Content="is verb" Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="2"/>
-                            <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="1" Grid.Row="2" Click="cmdSerachFilter_Click" Margin="0,20,0,0" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
-                            <TextBlock x:Name="tblCount" Grid.Row="2" Text="TextBlock" TextWrapping="Wrap" Margin="0,20,0,0" Grid.RowSpan="2"/>
+                            <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="2" Grid.Row="5" Click="cmdSerachFilter_Click" Height="30"/>
+                            <TextBlock x:Name="tblCount" Grid.Row="2" Text="TextBlock" TextWrapping="Wrap"/>
                             <ComboBox x:Name="cbxLength" Grid.Column="2"/>
+                            <CheckBox x:Name="chkAnagram" Content="anagram ?" Grid.Row="5" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="cbxAnagramCount" Grid.Column="1" Grid.Row="5"/>
+                            <CheckBox x:Name="chkFrequency" Content="sort frequency" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                         </Grid>
                         <StackPanel Background="#FFCB8787" Orientation="Horizontal" Grid.Column="1">
                             <TextBox x:Name="txtMot" Height="33" TextWrapping="Wrap" Width="118" Margin="5,5,5,5"/>
@@ -50,7 +55,20 @@
                         </StackPanel>
                     </Grid>
                     <ListBox x:Name="lbxPages" Grid.Row="1" Margin="5,5,5,5" SelectionChanged="lbxPages_SelectionChanged" Grid.RowSpan="2"/>
-                    <TextBox x:Name="txtPageLangText" Grid.Column="1" Grid.Row="1" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
+                    <Grid Grid.Column="1" Margin="5,5,5,5" Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="75"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="txtPageLangText" Text="TextBox" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible" Grid.Row="1"/>
+                        <Grid Background="#FF98BDD3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="37*"/>
+                                <RowDefinition Height="38*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="tblWordInfos" Grid.Row="1" Text="TextBlock" TextWrapping="Wrap" FontSize="14" FontWeight="Bold"/>
+                        </Grid>
+                    </Grid>
                     <TextBox x:Name="txtAllPageText" Grid.Column="1" Grid.Row="2" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5" VerticalScrollBarVisibility="Visible"/>
                     <Grid Grid.Column="2" Grid.RowSpan="2" Grid.Row="1" Background="#FFB6DAB8">
                         <Grid.RowDefinitions>
@@ -58,12 +76,16 @@
                             <RowDefinition Height="96"/>
                             <RowDefinition Height="Auto" MinHeight="26"/>
                             <RowDefinition Height="130"/>
-                            <RowDefinition/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="79*"/>
+                            <RowDefinition Height="20*"/>
                         </Grid.RowDefinitions>
                         <TextBox x:Name="txtAntonymes" Grid.Row="1" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5"/>
                         <TextBox x:Name="txtSynonymes" Grid.Row="3" Text="TextBox" TextWrapping="Wrap" Margin="5,5,5,5"/>
                         <TextBlock Text="antonymes" TextWrapping="Wrap" Margin="5,5,5,5"/>
                         <TextBlock Grid.Row="2" Text="synonymes" TextWrapping="Wrap" Margin="5,5,5,5"/>
+                        <TextBlock Grid.Row="4" Text="anagrams" TextWrapping="Wrap" Margin="0,0,0,83" Grid.RowSpan="2"/>
+                        <TextBox x:Name="txtAnagrams" Grid.Row="5" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" Margin="0,0,0,0"/>
                     </Grid>
                 </Grid>
             </TabItem>

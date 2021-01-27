@@ -2,21 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using CommonLibTools;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace WiktionaireParser.Models
 {
-    public static class RegexLib
-    {
-        public static Regex regexLink = new Regex(@"\[\[(.*?)\]\]");
-        public static Regex StartWithLangSectionRegex = new Regex(@"^==\s*{{langue\|fr}}\s*==");
-        public static Regex ContainsLangSectionRegex = new Regex(@"==\s*{{langue\|fr}}\s*==");
-        public static Regex OtherLangSectionRegex = new Regex(@"^==\s*{{langue");
-    }
     public class WikiPage
     {
         [BsonId]
         public string Title { get; set; }
+        public string TitleInv { get; set; }
+        public string AnagramKey { get; set; }
+        public int AnagramCount { get; set; }
         public string Text { get; set; }
         public string LangText { get; set; }
         public string Antonymes { get; set; }
@@ -24,16 +21,25 @@ namespace WiktionaireParser.Models
         public string Sinonymes { get; set; }
         public bool HasSinonymes { get; set; }
 
+
         public int Len;
         public bool IsVerb;
         public bool IsVerbFlexion;
         public bool IsNomCommun;
         public bool IsAdjective;
 
+        // frequency 
+
+        public long FrequencyCount { get; set; }
+        public long FrequencyTotalCount { get; set; }
+        public float Frequency { get; set; }
+        public long MostFrequentWordCount { get; set; }
 
         public WikiPage(string title, string text)
         {
             Title = title;
+            TitleInv = title.ToLowerInvariant().RemoveDiacritics();
+            AnagramKey = TitleInv.SortString();
             Text = text;
             Len = Title.Length;
 
