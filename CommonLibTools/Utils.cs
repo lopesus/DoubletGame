@@ -6,9 +6,17 @@ using System.Text;
 namespace CommonLibTools
 {
     public static class Utils
-
     {
-
+        public static string ReplaceAt(this string input, int index, char newChar)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException("input");
+            }
+            char[] chars = input.ToCharArray();
+            chars[index] = newChar;
+            return new string(chars);
+        }
         public static string SortString(this string input)
         {
             char[] characters = input.ToCharArray();

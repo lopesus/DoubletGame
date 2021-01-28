@@ -16,6 +16,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using CommonLibTools;
+using CommonLibTools.DataStructure.Dawg;
+using CommonLibTools.DataStructure.Dawg.Construction;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
 
@@ -34,7 +36,6 @@ namespace WiktionaireParser
         private IMongoCollection<WikiPage> wikiCollection;
         private IMongoCollection<Anagram> anagramCollection;
         private string wikiCollectionName;
-        private string anagramCollectionName;
 
         int pageToLoadFromDb = Int32.MaxValue;
         int pageToSkipFromDb = 0;
@@ -44,16 +45,22 @@ namespace WiktionaireParser
         WordFrequencyBuilder frequencyBuilder = new WordFrequencyBuilder();
 
         Dictionary<string, bool> correctWikiPageWords = new Dictionary<string, bool>();
+
+        ConstructTrie constructTrie = new ConstructTrie();
+        private Trie Trie;
+        private DawgService DawgService;
         public MainWindow()
         {
+
+            //constructTrie.GenerateTrieFromFile(@"C:\Users\mboum\Desktop\web\verbes\ods8_final.txt");
+
             // To directly connect to a single MongoDB server
             // (this will not auto-discover the primary even if it's a member of a replica set)
             client = new MongoClient();
             database = client.GetDatabase("wiki");
             wikiCollectionName = "fr";
-            anagramCollectionName = "ana";
             wikiCollection = database.GetCollection<WikiPage>(wikiCollectionName);
-            anagramCollection = database.GetCollection<Anagram>(anagramCollectionName);
+            anagramCollection = database.GetCollection<Anagram>("anagram");
 
             SetDbIndex();
 
@@ -80,6 +87,13 @@ namespace WiktionaireParser
                 .ToList();
 
             lbxPages.ItemsSource = PagesList;
+            var anagrams = anagramCollection.Find(FilterDefinition<Anagram>.Empty).ToList();
+            anagramBuilder = new AnagramBuilder(anagrams);
+
+            var lines = File.ReadAllLines(@"D:\__programs_datas\wiki_valid_word_trie.txt");
+
+            DawgService = new DawgService(lines);
+            Trie = DawgService.GetTrie();
         }
         private void cmdSerachFilter_Click(object sender, RoutedEventArgs e)
         {
@@ -111,8 +125,8 @@ namespace WiktionaireParser
                 .Skip(pageToSkipFromDb).Limit(pageToLoadFromDb);
             if (sortByFrequency)
             {
-              findFluent=  findFluent.Sort(sortByFrequencyDef);
-              //findFluent=  findFluent.Sort(sortByTitle);
+                findFluent = findFluent.Sort(sortByFrequencyDef);
+                //findFluent=  findFluent.Sort(sortByTitle);
             }
             else
             {
@@ -130,6 +144,7 @@ namespace WiktionaireParser
             database.DropCollection(wikiCollectionName);
             wikiCollection = database.GetCollection<WikiPage>(wikiCollectionName);
 
+            anagramBuilder = new AnagramBuilder();
             SplitDicoToPage();
             //remove non valid word in frequency builder
 
@@ -166,9 +181,8 @@ namespace WiktionaireParser
                            Builders<Anagram>.IndexKeys.Ascending(f => f.Count)
                            );
 
-            CreateIndexModel<Anagram> indexModelAnagram = new CreateIndexModel<Anagram>(indexDefinitionAnagram);
-
-            await anagramCollection.Indexes.CreateOneAsync(indexModelAnagram);
+            //CreateIndexModel<Anagram> indexModelAnagram = new CreateIndexModel<Anagram>(indexDefinitionAnagram);
+            //await anagramCollection.Indexes.CreateOneAsync(indexModelAnagram);
 
 
 
@@ -272,8 +286,10 @@ namespace WiktionaireParser
 
         public async void SaveToDB(List<WikiPage> list)
         {
+            var builder = new StringBuilder();
             foreach (var wikiPage in list)
             {
+                builder.AppendLine(wikiPage.TitleInv);
                 wikiPage.AnagramCount = anagramBuilder.GetCountFor(wikiPage.AnagramKey);
                 var frequency = frequencyBuilder.GetWordFrequency(wikiPage.TitleInv);
                 if (frequency != null)
@@ -284,12 +300,11 @@ namespace WiktionaireParser
                 }
 
                 wikiPage.MostFrequentWordCount = frequencyBuilder.MostFrequentWordCount;
-
             }
-
-
             await wikiCollection.InsertManyAsync(list);
             await anagramCollection.InsertManyAsync(anagramBuilder.GetAnagramsList());
+
+            File.WriteAllText(@"D:\__programs_datas\wiki_valid_word.txt", builder.ToString());
         }
 
         private void lbxPages_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -305,6 +320,8 @@ namespace WiktionaireParser
 
 
                 GetAnagramFor(page.AnagramKey);
+                var validWord = GetAllValidWordFor(page.AnagramKey);
+                txtAllPossibleWord.Text = validWord.ToString();
             }
         }
 
@@ -328,6 +345,10 @@ namespace WiktionaireParser
 
                     txtAntonymes.Text = page.Antonymes;
                     txtSynonymes.Text = page.Sinonymes;
+                    GetAnagramFor(page.AnagramKey);
+
+                    var validWord = GetAllValidWordFor(page.AnagramKey);
+                    txtAllPossibleWord.Text = validWord.ToString();
                 }
                 catch (Exception exception)
                 {
@@ -345,7 +366,8 @@ namespace WiktionaireParser
         {
             try
             {
-                var page = await anagramCollection.Find(x => x.Key == key).FirstAsync();//.Limit(1).ToListAsync();
+                var page = anagramBuilder.GetAnagramFor(key);
+                //var page = await anagramCollection.Find(x => x.Key == key).FirstAsync();//.Limit(1).ToListAsync();
                 var all = string.Join("\r\n", page.AnagramList);
                 txtAnagrams.Text = all;
 
@@ -358,6 +380,22 @@ namespace WiktionaireParser
 
 
             //var filter= Builders<WikiPage>.Filter.Eq(p => p.Title, mot);
+        }
+        private ValidWord GetAllValidWordFor(string key)
+        {
+            try
+            {
+                var result = DawgService.FindAllPossibleWord(key);
+                var validWord = new ValidWord(result);
+
+                return validWord;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                txtAnagrams.Text = exception.Message;
+                return null;
+            }
         }
 
 

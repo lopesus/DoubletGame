@@ -5,29 +5,34 @@ namespace WiktionaireParser.Models
 {
     public class AnagramBuilder
     {
-        private Dictionary<string, Anagram> dico;
+        public Dictionary<string, Anagram> Dico;
 
         public AnagramBuilder()
         {
-            dico = new Dictionary<string, Anagram>();
+            Dico = new Dictionary<string, Anagram>();
+        }
+
+        public AnagramBuilder(List<Anagram> anagrams)
+        {
+            Dico = anagrams.ToDictionary(a => a.Key);
         }
 
         public void Add(string key, string word)
         {
-            if (dico.ContainsKey(key) == false)
+            if (Dico.ContainsKey(key) == false)
             {
-                dico[key] = new Anagram(key);
+                Dico[key] = new Anagram(key);
             }
 
-            dico[key].AddWord(word);
+            Dico[key].AddWord(word);
 
         }
 
         public int GetCountFor(string key)
         {
-            if (dico.ContainsKey(key))
+            if (Dico.ContainsKey(key))
             {
-                return dico[key]?.Count ?? 0;
+                return Dico[key]?.Count ?? 0;
             }
 
             return 0;
@@ -35,7 +40,17 @@ namespace WiktionaireParser.Models
 
         public List<Anagram> GetAnagramsList()
         {
-            return dico.Values.ToList();
+            return Dico.Values.ToList();
+        }
+
+        public Anagram GetAnagramFor(string key)
+        {
+            if (key != null)
+            {
+                if (Dico.ContainsKey(key)) return Dico[key];
+            }
+
+            return null;
         }
     }
 }
