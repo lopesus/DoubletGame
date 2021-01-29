@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="WiktionaireParser.ui.UICell"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WiktionaireParser.ui"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="100">
+    <Grid Background="#FFDAB8B8">
+        <Border x:Name="border" BorderBrush="DarkGreen" BorderThickness="2,2,2,2" Background="White">
+            <Image x:Name="image" Height="50" Width="50" Margin="-2"/>
+        </Border>
+        <TextBlock x:Name="txtCoord" TextWrapping="Wrap" Text="x20 y30" Foreground="Black" Panel.ZIndex="10" FontWeight="Bold" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0"/>
+        <TextBlock x:Name="txtFcost" HorizontalAlignment="Left" Height="16" Margin="2,2,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="17" FontSize="9" TextAlignment="Center" Foreground="#FFD10808" FontWeight="Bold" Panel.ZIndex="10"/>
+        <TextBlock x:Name="txtHCost" HorizontalAlignment="Left" Height="16" Margin="31,32,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="17" Foreground="#FF005116" FontSize="9" FontWeight="Bold" Panel.ZIndex="10"/>
+        <TextBlock x:Name="txtGCost" HorizontalAlignment="Left" Height="16" Margin="2,32,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="17" Foreground="#FFAE00FF" FontSize="9" FontWeight="Bold" Panel.ZIndex="10"/>
+        <TextBlock x:Name="tblLetter" Text="z" TextWrapping="Wrap" FontWeight="Bold" FontSize="72" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+
+    </Grid>
+</UserControl>

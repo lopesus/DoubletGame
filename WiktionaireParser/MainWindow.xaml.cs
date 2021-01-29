@@ -77,7 +77,7 @@ namespace WiktionaireParser
             cbxAnagramCount.ItemsSource = Enumerable.Range(0, 20);//.Select(x => x * x);
             cbxAnagramCount.SelectedIndex = 0;
 
-            LoadPagesFromDb();
+           // LoadPagesFromDb();
         }
 
         private void LoadPagesFromDb()
