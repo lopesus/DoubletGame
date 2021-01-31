@@ -75,7 +75,15 @@ namespace WiktionaireParser.ui
             }
             else
             {
-                SetBrush(UiBrushes.Filled);
+                SetBrush(UiBrushes.White);
+                SetTextColor(UiBrushes.Black);
+            }
+
+            if (WordCell.ExcludedFromMaze)
+            {
+                SetBrush(UiBrushes.Black);
+                border.BorderBrush = UiBrushes.Black;
+                SetTextColor(UiBrushes.White);
             }
         }
 
@@ -88,13 +96,18 @@ namespace WiktionaireParser.ui
             }
             else
             {
-                SetBrush(UiBrushes.Filled);
+                SetBrush(UiBrushes.White);
             }
         }
 
         public void SetBrush(SolidColorBrush brush)
         {
             border.Background = brush;
+        }
+
+        public void SetTextColor(SolidColorBrush brush)
+        {
+            txtCoord.Foreground = brush;
         }
        
 

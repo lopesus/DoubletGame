@@ -12,6 +12,9 @@ namespace WiktionaireParser.Models.CrossWord
         public CrossWordDirection Direction { get; set; }
         public List<CrossWordCell> WordCellsList { get; set; }
 
+        public CrossWordCell BeforeStartCell;
+        public CrossWordCell AfterEndCell;
+
 
 
         public CrossWordWord(string word, Coord coord, CrossWordDirection direction)
@@ -43,6 +46,12 @@ namespace WiktionaireParser.Models.CrossWord
                         WordCellsList.Add(wordCell);
                     }
 
+                    BeforeStartCell =  new CrossWordCell(StartCoord.GetLeftCoord());
+                    BeforeStartCell.ExcludedFromMaze = true;
+
+                    AfterEndCell = new CrossWordCell(EndCoord.GetRightCoord());
+                    AfterEndCell.ExcludedFromMaze = true;
+
 
                     break;
                 case CrossWordDirection.Vertical:
@@ -54,6 +63,12 @@ namespace WiktionaireParser.Models.CrossWord
                         CrossWordCell wordCell = new CrossWordCell(car, cellCoord, direction, this);
                         WordCellsList.Add(wordCell);
                     }
+
+                    BeforeStartCell = new CrossWordCell(StartCoord.GetUpCoord());
+                    BeforeStartCell.ExcludedFromMaze = true;
+
+                    AfterEndCell = new CrossWordCell(EndCoord.GetDownCoord());
+                    AfterEndCell.ExcludedFromMaze = true;
                     break;
             }
         }

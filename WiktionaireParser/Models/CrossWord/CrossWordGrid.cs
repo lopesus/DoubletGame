@@ -7,34 +7,50 @@ using PathFindingModel;
 
 namespace WiktionaireParser.Models.CrossWord
 {
-    public  class CrossWordGrid
+    public class CrossWordGrid
     {
         public int NumCol { get; set; }
         public int NumRow { get; set; }
         public CrossWordCell[,] MazeCellList { get; set; }
 
         public bool IsEmpty { get; set; }
-        public CrossWordGrid(int numRow,int numCol )
+        public CrossWordGrid(int numRow, int numCol)
         {
             NumCol = numCol;
             NumRow = numRow;
-            MazeCellList = new CrossWordCell[ NumRow, NumCol];
+            MazeCellList = new CrossWordCell[NumRow, NumCol];
             IsEmpty = true;
 
             for (int col = 0; col < NumCol; col++)
             {
                 for (int row = 0; row < NumRow; row++)
                 {
-                    var coord=new Coord(row,col);
+                    var coord = new Coord(row, col);
                     CrossWordCell cell = new CrossWordCell(coord);
-                    MazeCellList[row,col] = cell;
+                    MazeCellList[row, col] = cell;
                 }
             }
         }
 
+        public void PutWordAt(CrossWordWord word, Coord coord, CrossWordDirection direction)
+        {
+            foreach (var crossWordCell in word.WordCellsList)
+            {
+                var cellCoord = crossWordCell.Coord;
+                var cell = GetCell(cellCoord);//MazeCellList[cellCoord.Row, cellCoord.Col];
+                cell?.CopyFrom(crossWordCell);
+            }
+
+            var wordCell = GetCell(word.BeforeStartCell.Coord);
+            wordCell?.CopyFrom(word.BeforeStartCell);
+
+            wordCell = GetCell(word.AfterEndCell.Coord);
+            wordCell?.CopyFrom(word.AfterEndCell);
+        }
+
         bool CanFitOnGrid(string word, Coord coord, CrossWordDirection direction)
         {
-
+            var corssWord = new CrossWordWord(word, coord, direction);
             return false;
         }
 
@@ -124,7 +140,7 @@ namespace WiktionaireParser.Models.CrossWord
             List<CrossWordCell> list = new List<CrossWordCell>();
 
             if (cell == null) return list;
-            
+
 
             var coord = cell.Coord;
 

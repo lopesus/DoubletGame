@@ -21,6 +21,7 @@ namespace WiktionaireParser.Models.CrossWord
         {
             this.Coord = coord;
             IsEmpty = true;
+            Letter = "";
         }
 
         public CrossWordCell( char car, Coord cellCoord, CrossWordDirection direction, CrossWordWord crossWordWord)
@@ -32,12 +33,13 @@ namespace WiktionaireParser.Models.CrossWord
             IsEmpty = false;
         }
 
-        public void CopyFrom(CrossWordCell from)
+        public void CopyFrom(CrossWordCell fromCell)
         {
-            Letter = from.Letter;
-            IsEmpty = from.IsEmpty;
-            Direction = from.Direction;
-            ParentWord = from.ParentWord;
+            Letter = fromCell.Letter;
+            IsEmpty = fromCell.IsEmpty;
+            Direction = fromCell.Direction;
+            ParentWord = fromCell.ParentWord;
+            ExcludedFromMaze = fromCell.ExcludedFromMaze;
         }
     }
 }

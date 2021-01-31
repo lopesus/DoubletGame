@@ -48,22 +48,50 @@ namespace WiktionaireParser.ui
         {
             InitializeComponent();
         }
+        public UICell GetUICell(Coord coord)
+        {
+            try
+            {
+                return UIMazeCellList[coord.Row, coord.Col];
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+
+            }
+
+        }
 
 
         private void cmdPutNextWord_Click(object sender, RoutedEventArgs e)
         {
-            PutWordAt("cure",new Coord(3,3),CrossWordDirection.Horizontal );
+            PutWordAt("cure", new Coord(3, 4), CrossWordDirection.Horizontal);
         }
 
         void PutWordAt(string word, Coord coord, CrossWordDirection direction)
         {
+
             CrossWordWord crossWordWord = new CrossWordWord(word, coord, direction);
+            CrossWordGrid.PutWordAt(crossWordWord, coord, direction);
 
             foreach (var crossWordCell in crossWordWord.WordCellsList)
             {
                 var cellCoord = crossWordCell.Coord;
                 var uiCell = UIMazeCellList[cellCoord.Row, cellCoord.Col];
                 uiCell.SetWord(crossWordCell);
+            }
+
+            var uiCell2 = GetUICell(crossWordWord.BeforeStartCell.Coord);
+            if (uiCell2 != null)
+            {
+                uiCell2.SetWord(crossWordWord.BeforeStartCell);
+            }
+
+            uiCell2 = GetUICell(crossWordWord.AfterEndCell.Coord);
+            if (uiCell2 != null)
+            {
+                uiCell2.SetWord(crossWordWord.AfterEndCell);
             }
         }
 
