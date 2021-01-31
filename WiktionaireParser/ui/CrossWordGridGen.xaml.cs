@@ -26,7 +26,7 @@ namespace WiktionaireParser.ui
         public static int NumCol = 9;
         public static int NumRow = 9;
 
-        public CrossWordGrid CrossWordGrid { get; set; }
+        public CrossWordGrid WordGrid { get; set; }
 
         Random random = new Random();
 
@@ -66,14 +66,17 @@ namespace WiktionaireParser.ui
 
         private void cmdPutNextWord_Click(object sender, RoutedEventArgs e)
         {
-            PutWordAt("cure", new Coord(3, 4), CrossWordDirection.Horizontal);
+            if (WordGrid.IsEmpty)
+            {
+                PutWordAt("cure", new Coord(3, 4), CrossWordDirection.Horizontal);
+            }
         }
 
         void PutWordAt(string word, Coord coord, CrossWordDirection direction)
         {
 
             CrossWordWord crossWordWord = new CrossWordWord(word, coord, direction);
-            CrossWordGrid.PutWordAt(crossWordWord, coord, direction);
+            WordGrid.PutWordAt(crossWordWord, coord, direction);
 
             foreach (var crossWordCell in crossWordWord.WordCellsList)
             {
@@ -132,7 +135,7 @@ namespace WiktionaireParser.ui
         {
             mainCanvas.Children.Clear();
 
-            CrossWordGrid = new CrossWordGrid(NumRow, NumCol);
+            WordGrid = new CrossWordGrid(NumRow, NumCol);
 
             mainCanvas.Width = NumCol * UICell.CellSize;
             mainCanvas.Height = NumRow * UICell.CellSize;
@@ -145,7 +148,7 @@ namespace WiktionaireParser.ui
                 for (int row = 0; row < NumRow; row++)
                 {
                     empty = random.Next(0, 101) > 50;
-                    var wordCell = CrossWordGrid.MazeCellList[row, col];
+                    var wordCell = WordGrid.MazeCellList[row, col];
                     UICell uiCell = new UICell(wordCell);
                     mainCanvas.Children.Add(uiCell);
                     UIMazeCellList[row, col] = uiCell;

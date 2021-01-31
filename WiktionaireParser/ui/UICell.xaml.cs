@@ -29,8 +29,8 @@ namespace WiktionaireParser.ui
         public UICell()
         {
             InitializeComponent();
-            txtGCost.Text = "";
-            txtFcost.Text = "";
+            txtBehind.Text = "";
+            txtInFront.Text = "";
             txtHCost.Text = "";
             tblLetter.Text = "";
         }
@@ -42,12 +42,12 @@ namespace WiktionaireParser.ui
             InitializeComponent();
             Letter = "";
             WordCell = cell;
-            txtGCost.Text = "";
-            txtFcost.Text = "";
+            txtBehind.Text = "";
+            txtInFront.Text = "";
             txtHCost.Text = "";
             tblLetter.Text = "";
 
-            Canvas.SetLeft(this, WordCell.Coord.Col * CellSize);
+           Canvas.SetLeft(this, WordCell.Coord.Col * CellSize);
             Canvas.SetTop(this, WordCell.Coord.Row * CellSize);
 
             txtCoord.Text = WordCell.Coord.ToString();
@@ -60,6 +60,7 @@ namespace WiktionaireParser.ui
         public void SetWord(CrossWordCell wordCell)
         {
             Letter = wordCell.Letter;
+           
             this.WordCell.CopyFrom(wordCell);
             
             UpdateData();
@@ -68,6 +69,9 @@ namespace WiktionaireParser.ui
         private void UpdateData()
         {
             tblLetter.Text = Letter.ToUpper();
+            txtBehind.Text = WordCell.SpaceBehind.ToString();
+            txtInFront.Text = WordCell.SpaceInFront.ToString();
+
             if (WordCell.IsEmpty)
             {
                 SetBrush(UiBrushes.Empty);

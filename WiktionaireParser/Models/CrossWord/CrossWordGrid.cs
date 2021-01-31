@@ -13,12 +13,15 @@ namespace WiktionaireParser.Models.CrossWord
         public int NumRow { get; set; }
         public CrossWordCell[,] MazeCellList { get; set; }
 
+        public List<CrossWordCell> AnchorCellsList;
+
         public bool IsEmpty { get; set; }
         public CrossWordGrid(int numRow, int numCol)
         {
             NumCol = numCol;
             NumRow = numRow;
             MazeCellList = new CrossWordCell[NumRow, NumCol];
+            AnchorCellsList = new List<CrossWordCell>();
             IsEmpty = true;
 
             for (int col = 0; col < NumCol; col++)
@@ -34,11 +37,29 @@ namespace WiktionaireParser.Models.CrossWord
 
         public void PutWordAt(CrossWordWord word, Coord coord, CrossWordDirection direction)
         {
+            if (IsEmpty)
+            {
+                IsEmpty = false;
+            }
             foreach (var crossWordCell in word.WordCellsList)
             {
                 var cellCoord = crossWordCell.Coord;
                 var cell = GetCell(cellCoord);//MazeCellList[cellCoord.Row, cellCoord.Col];
-                cell?.CopyFrom(crossWordCell);
+                if (cell != null)
+                {
+                    cell.CopyFrom(crossWordCell);
+
+                    var (behind, inFront) = GetSpaceAroundAnchorCell(cell);
+                    cell.SpaceBehind = behind;
+                    cell.SpaceInFront = inFront;
+
+                    //set also  in word cells 
+                    crossWordCell.SpaceBehind = behind;
+                    crossWordCell.SpaceInFront = inFront;
+
+
+                    AnchorCellsList.Add(cell);
+                }
             }
 
             var wordCell = GetCell(word.BeforeStartCell.Coord);
@@ -46,6 +67,14 @@ namespace WiktionaireParser.Models.CrossWord
 
             wordCell = GetCell(word.AfterEndCell.Coord);
             wordCell?.CopyFrom(word.AfterEndCell);
+        }
+
+
+        bool CanCrossCell(string word, CrossWordCell cell, CrossWordDirection direction)
+        {
+            fff
+            // var corssWord = new CrossWordWord(word, coord, direction);
+            return false;
         }
 
         bool CanFitOnGrid(string word, Coord coord, CrossWordDirection direction)
@@ -59,6 +88,48 @@ namespace WiktionaireParser.Models.CrossWord
 
         }
 
+        (int behind, int infront) GetSpaceAroundAnchorCell(CrossWordCell cell)
+        {
+            if (cell == null) return (0, 0);
+
+            int spaceInFront = 0;
+            int spaceBehind = 0;
+
+            int row = cell.Coord.Row;
+            int col = cell.Coord.Col;
+
+
+            //space in front 
+            var direction = cell.Direction == CrossWordDirection.Horizontal ? CrossWordDirection.Vertical : CrossWordDirection.Horizontal;
+
+            var nextCoord = cell.Coord.GetNextCoord(direction);
+            var next = GetCell(nextCoord);
+            while (next != null)
+            {
+                spaceInFront += 1;
+                nextCoord = nextCoord.GetNextCoord(direction);
+                next = GetCell(nextCoord);
+            }
+
+
+            //space behind 
+            nextCoord = cell.Coord.GetPreviousCoord(direction);
+            next = GetCell(nextCoord);
+            while (next != null)
+            {
+                spaceBehind += 1;
+                nextCoord = nextCoord.GetPreviousCoord(direction);
+                next = GetCell(nextCoord);
+            }
+            return (spaceBehind, spaceInFront);
+        }
+
+        /// <summary>
+        /// do not take into account excluded cell
+        /// </summary>
+        /// <param name="coord"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
         int GetDistanceToGridEdge(Coord coord, CrossWordDirection direction)
         {
             switch (direction)
@@ -119,17 +190,17 @@ namespace WiktionaireParser.Models.CrossWord
         {
             if (IsValidCell(coord))
             {
-                return MazeCellList[coord.Col, coord.Row];
+                return MazeCellList[coord.Row, coord.Col];
             }
 
             return null;
         }
 
-        public CrossWordCell GetCell(int x, int y)
+        public CrossWordCell GetCell(int row, int col)
         {
-            if (IsValidCell(x, y))
+            if (IsValidCell(row, col))
             {
-                return MazeCellList[x, y];
+                return MazeCellList[row, col];
             }
 
             return null;

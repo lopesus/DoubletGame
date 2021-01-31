@@ -40,6 +40,15 @@ namespace WiktionaireParser.Models.CrossWord
             Direction = fromCell.Direction;
             ParentWord = fromCell.ParentWord;
             ExcludedFromMaze = fromCell.ExcludedFromMaze;
+
+            SpaceBehind = fromCell.SpaceBehind;
+            SpaceInFront = fromCell.SpaceInFront;
+            
+        }
+
+        public override string ToString()
+        {
+            return $"{Coord} -  {Letter} - {Direction}, behind:{SpaceBehind} - after:{SpaceInFront}";
         }
     }
 }

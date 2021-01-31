@@ -1,4 +1,5 @@
 using System;
+using CommonLibTools;
 
 namespace PathFindingModel
 {
@@ -55,6 +56,32 @@ namespace PathFindingModel
         //    var y = 2 * i.Row - a.Row;
         //    return new Coord(x, y);
         //}
+
+        public Coord GetNextCoord(CrossWordDirection direction)
+        {
+            switch (direction)
+            {
+                case CrossWordDirection.Horizontal:
+                    return GetRightCoord();
+                case CrossWordDirection.Vertical:
+                    return GetDownCoord();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+            }
+        } 
+        
+        public Coord GetPreviousCoord(CrossWordDirection direction)
+        {
+            switch (direction)
+            {
+                case CrossWordDirection.Horizontal:
+                    return GetLeftCoord();
+                case CrossWordDirection.Vertical:
+                    return GetUpCoord();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+            }
+        }
         public Coord GetUpCoord()
         {
             return new Coord(this.Row - 1, this.Col);
