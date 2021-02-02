@@ -66,11 +66,11 @@ namespace WiktionaireParser.ui
 
             UpdateData();
         }
-        public void DrawLetter(CrossWordLetter letter)
+        public void DrawLetter(CrossWordLetter letter, bool firstLetter)
         {
             Letter = letter.Letter;
             WordCell.IsEmpty = false;
-
+            IsAsGridStartingCell = firstLetter == true || IsAsGridStartingCell;
             //this.WordCell.SetLetter(wordCell);
 
             UpdateData();

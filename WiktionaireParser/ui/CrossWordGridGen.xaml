@@ -25,7 +25,8 @@
             <Button x:Name="cmdPutNextWord" Content="NEXT WORD" Click="cmdPutNextWord_Click" Canvas.Left="104" Canvas.Top="2" Width="75" Height="30"/>
             <Button x:Name="cmdGenFullGrid" Content="gen full grid" Click="cmdGenFullGrid_Click" Canvas.Left="212" Canvas.Top="2" Width="75" Height="30"/>
             <Button x:Name="cmdGenMany" Content="gen many" Canvas.Left="302" Canvas.Top="2" Width="75" Height="30" Click="cmdGenMany_Click"/>
-            <TextBox x:Name="txtWordForGrid" Height="20" Canvas.Left="394" Canvas.Top="10" Text="amer" TextWrapping="Wrap" Width="115"/>
+            <TextBox x:Name="txtWordForGrid" Height="20" Canvas.Left="394" Canvas.Top="10" Text="amer" TextWrapping="Wrap" Width="67"/>
+            <ComboBox x:Name="cbsGridSize" Height="20" Canvas.Left="476" Canvas.Top="10" Width="64" SelectionChanged="cbsGridSize_SelectionChanged"/>
         </Canvas>
         <ListBox x:Name="lbxGeneators" Grid.Row="2" SelectionChanged="lbxGeneators_SelectionChanged"/>
         <Grid Grid.ColumnSpan="3" Grid.Row="1" Background="#FFB06868">

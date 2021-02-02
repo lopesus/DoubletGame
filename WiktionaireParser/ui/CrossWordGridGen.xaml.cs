@@ -51,6 +51,7 @@ namespace WiktionaireParser.ui
         };
 
         private List<string> wordListCopy = new List<string>();
+        private int gridSize;
 
         List<CrossWord> fitOnGridList { get; set; }
 
@@ -59,8 +60,11 @@ namespace WiktionaireParser.ui
         public CrossWordGridGen()
         {
             InitializeComponent();
+            gridSize = 9;
             DawgService = MainWindow.DawgService;
             wordListCopy = wordList.ToList();
+            cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
+            cbsGridSize.SelectedIndex = 2;
         }
         public UICell GetUICell(Coord coord)
         {
@@ -98,6 +102,7 @@ namespace WiktionaireParser.ui
 
         private void cmdGenMany_Click(object sender, RoutedEventArgs e)
         {
+            gridSize = (int)cbsGridSize.SelectedValue;
             DawgService = MainWindow.DawgService;
             var text = txtWordForGrid.Text;
             if (text.IsNullOrEmptyString())
@@ -106,8 +111,8 @@ namespace WiktionaireParser.ui
             }
 
             var allPossibleWord = DawgService.FindAllPossibleWord(text);
-            var set=new HashSet<string>();
-            foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p=>p.Key>2))
+            var set = new HashSet<string>();
+            foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p => p.Key > 2))
             {
                 set.UnionWith(pair.Value);
             }
@@ -116,10 +121,10 @@ namespace WiktionaireParser.ui
 
             var temp = string.Join(" ", list1);
             tblAllWord.Text = temp;
-            GenerateManyGrid(list1);
+            GenerateManyGrid(list1, gridSize);
         }
 
-        void GenerateManyGrid(List<string> aList)
+        void GenerateManyGrid(List<string> aList, int size)
         {
             int take = 1000;
             var result = new List<CrossWordGenerator>();
@@ -129,23 +134,25 @@ namespace WiktionaireParser.ui
 
             foreach (var startingPosition in startingPositions.Take(take))
             {
-                var generator = new CrossWordGenerator(NumRow, NumCol, wordList, startingPosition);
+                var generator = new CrossWordGenerator(size, size, wordList, startingPosition);
                 result.Add(generator);
             }
 
-            lbxGeneators.ItemsSource = result.OrderByDescending(g=>g.FitWordList.Count);
+            lbxGeneators.ItemsSource = result.OrderByDescending(g => g.FitWordList.Count);
         }
 
         public void DrawGrid(CrossWordGenerator generator)
         {
             SetMaze();
+            var firstLetter = true;
             foreach (var crossWord in generator.FitWordList)
             {
                 foreach (var letter in crossWord.WordLetterList)
                 {
                     var cellCoord = letter.Coord;
                     var uiCell = UIMazeCellList[cellCoord.Row, cellCoord.Col];
-                    uiCell.DrawLetter(letter);
+                    uiCell.DrawLetter(letter, firstLetter);
+                    firstLetter = false;
                 }
             }
         }
@@ -156,7 +163,7 @@ namespace WiktionaireParser.ui
             GenFullCrossword();
         }
 
-       
+
         void GenFullCrossword()
         {
             fitOnGridList = new List<CrossWord>();
@@ -337,5 +344,12 @@ namespace WiktionaireParser.ui
 
         }
 
+        private void cbsGridSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int size = (int) cbsGridSize.SelectedValue;
+
+            NumRow = size;
+            NumCol = size;
+        }
     }
 }
