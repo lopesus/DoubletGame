@@ -47,8 +47,8 @@ namespace WiktionaireParser
         Dictionary<string, bool> correctWikiPageWords = new Dictionary<string, bool>();
 
         ConstructTrie constructTrie = new ConstructTrie();
-        private Trie Trie;
-        private DawgService DawgService;
+        public static Trie Trie;
+        public static DawgService DawgService;
         public MainWindow()
         {
 
@@ -77,7 +77,8 @@ namespace WiktionaireParser
             cbxAnagramCount.ItemsSource = Enumerable.Range(0, 20);//.Select(x => x * x);
             cbxAnagramCount.SelectedIndex = 0;
 
-           // LoadPagesFromDb();
+            // LoadPagesFromDb();
+            LoadTrie();
         }
 
         private void LoadPagesFromDb()
@@ -90,11 +91,17 @@ namespace WiktionaireParser
             var anagrams = anagramCollection.Find(FilterDefinition<Anagram>.Empty).ToList();
             anagramBuilder = new AnagramBuilder(anagrams);
 
+           // LoadTrie();
+        }
+
+        private void LoadTrie()
+        {
             var lines = File.ReadAllLines(@"D:\__programs_datas\wiki_valid_word_trie.txt");
 
             DawgService = new DawgService(lines);
             Trie = DawgService.GetTrie();
         }
+
         private void cmdSerachFilter_Click(object sender, RoutedEventArgs e)
         {
             bool isVerb = chkVerb.IsChecked ?? false;

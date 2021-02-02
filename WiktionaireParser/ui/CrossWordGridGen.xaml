@@ -8,19 +8,30 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="93*"/>
-            <ColumnDefinition Width="107*"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="50"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="63"/>
             <RowDefinition Height="55"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Viewbox Grid.Row="2" OpacityMask="#FF8B2626">
+        <Viewbox Grid.Row="2" OpacityMask="#FF8B2626" Grid.Column="1">
             <Canvas x:Name="mainCanvas" Height="900" Width="900" Background="#FF8CA2A4"/>
         </Viewbox>
-        <Button x:Name="cmdGenGrid" Content="gen grid" HorizontalAlignment="Left" Height="48" Margin="10,10,0,0" VerticalAlignment="Top" Width="84" Click="cmdGenGrid_Click"/>
-        <Button x:Name="cmdPutNextWord" Content="NEXT WORD" HorizontalAlignment="Left" Height="48" Margin="120,10,0,0" VerticalAlignment="Top" Width="78" Click="cmdPutNextWord_Click"/>
+        <Canvas Grid.Column="1" Background="#FFD89F9F">
+            <Button x:Name="cmdGenGrid" Content="gen grid" Click="cmdGenGrid_Click" Width="75" Height="30"/>
+            <Button x:Name="cmdPutNextWord" Content="NEXT WORD" Click="cmdPutNextWord_Click" Canvas.Left="104" Canvas.Top="2" Width="75" Height="30"/>
+            <Button x:Name="cmdGenFullGrid" Content="gen full grid" Click="cmdGenFullGrid_Click" Canvas.Left="212" Canvas.Top="2" Width="75" Height="30"/>
+            <Button x:Name="cmdGenMany" Content="gen many" Canvas.Left="302" Canvas.Top="2" Width="75" Height="30" Click="cmdGenMany_Click"/>
+            <TextBox x:Name="txtWordForGrid" Height="20" Canvas.Left="394" Canvas.Top="10" Text="amer" TextWrapping="Wrap" Width="115"/>
+        </Canvas>
+        <ListBox x:Name="lbxGeneators" Grid.Row="2" SelectionChanged="lbxGeneators_SelectionChanged"/>
+        <Grid Grid.ColumnSpan="3" Grid.Row="1" Background="#FFB06868">
+            <TextBlock x:Name="tblAllWord" Text="TextBlock" TextWrapping="Wrap" Height="30" FontWeight="Bold"/>
+
+        </Grid>
 
     </Grid>
 </UserControl>

@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CommonLibTools;
+using CommonLibTools.DataStructure.Dawg;
 using CommonLibTools.Extensions;
 using PathFindingModel;
 using WiktionaireParser.Models.CrossWord;
@@ -28,9 +29,10 @@ namespace WiktionaireParser.ui
         public static int NumCol = 9;
         public static int NumRow = 9;
 
-        public CrossWordGrid WordGrid { get; set; }
+        public CrossWordGrid Grid { get; set; }
 
         Random random = new Random();
+
 
         List<string> wordList = new List<string>()
         {
@@ -49,10 +51,15 @@ namespace WiktionaireParser.ui
         };
 
         private List<string> wordListCopy = new List<string>();
+
+        List<CrossWord> fitOnGridList { get; set; }
+
+        public DawgService DawgService { get; set; }
+
         public CrossWordGridGen()
         {
             InitializeComponent();
-
+            DawgService = MainWindow.DawgService;
             wordListCopy = wordList.ToList();
         }
         public UICell GetUICell(Coord coord)
@@ -72,45 +79,169 @@ namespace WiktionaireParser.ui
 
         string GetNextWord()
         {
-           // var word = wordListCopy.PickRandom();
+            // var word = wordListCopy.PickRandom();
             var word = wordListCopy.FirstOrDefault();
             wordListCopy.Remove(word);
             return word?.ToLowerInvariant();
         }
 
-        private void cmdPutNextWord_Click(object sender, RoutedEventArgs e)
+
+        private void lbxGeneators_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string word = GetNextWord();
-            if (WordGrid.IsEmpty)
+            var gen = lbxGeneators.SelectedItem as CrossWordGenerator;
+            if (gen != null)
             {
-                var list = WordGrid.GetStartingCoordFor(word);
-                var startingPosition = list.PickRandom();
-                PutWordAt(word, startingPosition.Coord, startingPosition.Direction);
+                DrawGrid(gen);
             }
-            else
+        }
+
+
+        private void cmdGenMany_Click(object sender, RoutedEventArgs e)
+        {
+            DawgService = MainWindow.DawgService;
+            var text = txtWordForGrid.Text;
+            if (text.IsNullOrEmptyString())
             {
-                var crossingIndexHoriz = WordGrid.SelectRandomAnchor(word, CrossWordDirection.Horizontal);
-                var crossingIndexVert = WordGrid.SelectRandomAnchor(word, CrossWordDirection.Vertical);
-                var crossingIndex = WordGrid.SelectRandomAnchor(word);
+                text = "cure";
+            }
+
+            var allPossibleWord = DawgService.FindAllPossibleWord(text);
+            var set=new HashSet<string>();
+            foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p=>p.Key>2))
+            {
+                set.UnionWith(pair.Value);
+            }
+
+            var list1 = set.OrderByDescending(d => d.Length).ToList();
+
+            var temp = string.Join(" ", list1);
+            tblAllWord.Text = temp;
+            GenerateManyGrid(list1);
+        }
+
+        void GenerateManyGrid(List<string> aList)
+        {
+            int take = 1000;
+            var result = new List<CrossWordGenerator>();
+            var wordList = aList.OrderByDescending(d => d.Length).ToList();
+            var testGrid = new CrossWordGrid(NumRow, NumCol);
+            var startingPositions = testGrid.GetStartingCoordFor(wordList.First());
+
+            foreach (var startingPosition in startingPositions.Take(take))
+            {
+                var generator = new CrossWordGenerator(NumRow, NumCol, wordList, startingPosition);
+                result.Add(generator);
+            }
+
+            lbxGeneators.ItemsSource = result.OrderByDescending(g=>g.FitWordList.Count);
+        }
+
+        public void DrawGrid(CrossWordGenerator generator)
+        {
+            SetMaze();
+            foreach (var crossWord in generator.FitWordList)
+            {
+                foreach (var letter in crossWord.WordLetterList)
+                {
+                    var cellCoord = letter.Coord;
+                    var uiCell = UIMazeCellList[cellCoord.Row, cellCoord.Col];
+                    uiCell.DrawLetter(letter);
+                }
+            }
+        }
+
+        private void cmdGenFullGrid_Click(object sender, RoutedEventArgs e)
+        {
+            SetMaze();
+            GenFullCrossword();
+        }
+
+       
+        void GenFullCrossword()
+        {
+            fitOnGridList = new List<CrossWord>();
+            Dictionary<string, int> rejected = new Dictionary<string, int>();
+            string word = GetNextWord();
+            var tripleRejection = false;
+
+            var list = Grid.GetStartingCoordFor(word);
+            var startingPosition = list.PickRandom();
+            PutWordAt(word, startingPosition.Coord, startingPosition.Direction);
+
+            var uiCell = UIMazeCellList[startingPosition.Coord.Row, startingPosition.Coord.Col];
+            uiCell.SetAsGrigStartingCell();
+
+            word = GetNextWord();
+
+            while (word != null && tripleRejection == false)
+            {
+                //var crossingIndexHoriz = Grid.SelectRandomAnchor(word, CrossWordDirection.Horizontal);
+                //var crossingIndexVert = Grid.SelectRandomAnchor(word, CrossWordDirection.Vertical);
+                var crossingIndex = Grid.SelectRandomAnchor(word);
                 Console.WriteLine();
 
                 if (crossingIndex != null)
                 {
                     var start = crossingIndex.StartCoord;
-                    PutWordAt(word,start,crossingIndex.Direction);
+                    PutWordAt(word, start, crossingIndex.Direction);
+                    rejected.Clear();
                 }
                 else
                 {
+                    if (rejected.ContainsKey(word) == false) rejected[word] = 0;
+                    rejected[word] += 1;
+                    if (rejected[word] >= 2)
+                    {
+                        tripleRejection = true;
+                    }
+                    wordListCopy.Add(word);
+
+                }
+
+                word = GetNextWord();
+            }
+
+            MessageBox.Show($"fit on grid {fitOnGridList.Count} on {wordList.Count}".ToUpper());
+
+        }
+
+        private void cmdPutNextWord_Click(object sender, RoutedEventArgs e)
+        {
+            string word = GetNextWord();
+            if (Grid.IsEmpty)
+            {
+                var list = Grid.GetStartingCoordFor(word);
+                var startingPosition = list.PickRandom();
+                PutWordAt(word, startingPosition.Coord, startingPosition.Direction);
+            }
+            else
+            {
+                var crossingIndexHoriz = Grid.SelectRandomAnchor(word, CrossWordDirection.Horizontal);
+                var crossingIndexVert = Grid.SelectRandomAnchor(word, CrossWordDirection.Vertical);
+                var crossingIndex = Grid.SelectRandomAnchor(word);
+                Console.WriteLine();
+
+                if (crossingIndex != null)
+                {
+                    var start = crossingIndex.StartCoord;
+                    PutWordAt(word, start, crossingIndex.Direction);
+                }
+                else
+                {
+                    wordListCopy.Add(word);
                     MessageBox.Show($"NO CROSSING for {word}".ToUpper());
                 }
             }
         }
-        
+
+
+
         void PutWordAt(string word, Coord coord, CrossWordDirection direction)
         {
-
             CrossWord crossWord = new CrossWord(word, coord, direction);
-            WordGrid.PutWordAt(crossWord, coord, direction);
+            fitOnGridList.Add(crossWord);
+
+            Grid.PutWordAt(crossWord, coord, direction);
 
             foreach (var crossWordCell in crossWord.WordLetterList)
             {
@@ -174,8 +305,8 @@ namespace WiktionaireParser.ui
             {
                 for (int row = 0; row < NumRow; row++)
                 {
-                   var uiCell= UIMazeCellList[row, col];
-                   uiCell.UpdateData();
+                    var uiCell = UIMazeCellList[row, col];
+                    uiCell.UpdateData();
                 }
             }
         }
@@ -184,7 +315,7 @@ namespace WiktionaireParser.ui
             mainCanvas.Children.Clear();
             wordListCopy = wordList.ToList();
 
-            WordGrid = new CrossWordGrid(NumRow, NumCol);
+            Grid = new CrossWordGrid(NumRow, NumCol);
 
             mainCanvas.Width = NumCol * UICell.CellSize;
             mainCanvas.Height = NumRow * UICell.CellSize;
@@ -197,7 +328,7 @@ namespace WiktionaireParser.ui
                 for (int row = 0; row < NumRow; row++)
                 {
                     empty = random.Next(0, 101) > 50;
-                    var wordCell = WordGrid.MazeCellList[row, col];
+                    var wordCell = Grid.MazeCellList[row, col];
                     UICell uiCell = new UICell(wordCell);
                     mainCanvas.Children.Add(uiCell);
                     UIMazeCellList[row, col] = uiCell;

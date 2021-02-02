@@ -21,9 +21,10 @@ namespace WiktionaireParser.ui
     public partial class UICell : UserControl
     {
         public static int CellSize = 100;
+        public bool IsAsGridStartingCell { get; set; }
 
         public CrossWordCell WordCell { get; set; }
-       // public Coord Coord { get; set; }
+        // public Coord Coord { get; set; }
         public string Letter { get; set; }
 
         public UICell()
@@ -47,7 +48,7 @@ namespace WiktionaireParser.ui
             txtHCost.Text = "";
             tblLetter.Text = "";
 
-           Canvas.SetLeft(this, WordCell.Coord.Col * CellSize);
+            Canvas.SetLeft(this, WordCell.Coord.Col * CellSize);
             Canvas.SetTop(this, WordCell.Coord.Row * CellSize);
 
             txtCoord.Text = WordCell.Coord.ToString();
@@ -60,9 +61,18 @@ namespace WiktionaireParser.ui
         public void SetWord(CrossWordLetter wordCell)
         {
             Letter = wordCell.Letter;
-           
+
             //this.WordCell.SetLetter(wordCell);
-            
+
+            UpdateData();
+        }
+        public void DrawLetter(CrossWordLetter letter)
+        {
+            Letter = letter.Letter;
+            WordCell.IsEmpty = false;
+
+            //this.WordCell.SetLetter(wordCell);
+
             UpdateData();
         }
 
@@ -89,14 +99,19 @@ namespace WiktionaireParser.ui
                 border.BorderBrush = UiBrushes.Black;
                 SetTextColor(UiBrushes.White);
             }
+
+            if (IsAsGridStartingCell)
+            {
+                border.Background = UiBrushes.StartBrush;
+            }
         }
 
         public void Init()
         {
             if (WordCell.IsEmpty)
             {
-               SetBrush(UiBrushes.Empty);
-               border.BorderBrush = UiBrushes.Empty;
+                SetBrush(UiBrushes.Empty);
+                border.BorderBrush = UiBrushes.Empty;
             }
             else
             {
@@ -113,7 +128,7 @@ namespace WiktionaireParser.ui
         {
             txtCoord.Foreground = brush;
         }
-       
+
 
         public void SetData(Coord cell)
         {
@@ -138,6 +153,11 @@ namespace WiktionaireParser.ui
             //    Cell = this,
             //    ClickType = ClickType.Right,
             //});
+        }
+
+        public void SetAsGrigStartingCell()
+        {
+            IsAsGridStartingCell = true;
         }
 
     }
