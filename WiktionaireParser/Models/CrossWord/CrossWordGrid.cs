@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using CommonLibTools;
+using CommonLibTools.Extensions;
 using PathFindingModel;
 
 namespace WiktionaireParser.Models.CrossWord
@@ -35,51 +37,140 @@ namespace WiktionaireParser.Models.CrossWord
             }
         }
 
-        public void PutWordAt(CrossWordWord word, Coord coord, CrossWordDirection direction)
+        public List<StartingPosition> GetStartingCoordFor(string word)
+        {
+            var horiz = GetStartingCoordFor(word, CrossWordDirection.Horizontal);
+            var vert = GetStartingCoordFor(word, CrossWordDirection.Vertical);
+            var result = new List<StartingPosition>();
+            if (horiz?.Count > 0) result.AddRange(horiz);
+            if (vert?.Count > 0) result.AddRange(vert);
+            return result;
+        }
+
+        public List<StartingPosition> GetStartingCoordFor(string word, CrossWordDirection direction)
+        {
+            if (word.IsNullOrEmptyString()) return null;
+
+            var result = new List<StartingPosition>();
+            var len = word.Length;
+            for (int col = 0; col < NumCol; col++)
+            {
+                for (int row = 0; row < NumRow; row++)
+                {
+                    var cell = MazeCellList[row, col];
+                    int space = GetDistanceToGridEdge(cell.Coord, direction);
+                    if (space >= len)
+                    {
+                        result.Add(new StartingPosition(cell.Coord, direction));
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public void PutWordAt(CrossWord word, Coord coord, CrossWordDirection direction)
         {
             if (IsEmpty)
             {
                 IsEmpty = false;
             }
-            foreach (var crossWordCell in word.WordCellsList)
+            foreach (var letter in word.WordLetterList)
             {
-                var cellCoord = crossWordCell.Coord;
+                var cellCoord = letter.Coord;
                 var cell = GetCell(cellCoord);//MazeCellList[cellCoord.Row, cellCoord.Col];
                 if (cell != null)
                 {
-                    cell.CopyFrom(crossWordCell);
+                    cell.SetLetter(letter);
 
-                    var (behind, inFront) = GetSpaceAroundAnchorCell(cell);
-                    cell.SpaceBehind = behind;
-                    cell.SpaceInFront = inFront;
-
-                    //set also  in word cells 
-                    crossWordCell.SpaceBehind = behind;
-                    crossWordCell.SpaceInFront = inFront;
+                    //var (behind, inFront) = GetSpaceAroundAnchorCell(cell);
+                    //cell.SpaceBefore = behind;
+                    //cell.SpaceAfter = inFront;
 
 
                     AnchorCellsList.Add(cell);
                 }
             }
 
-            var wordCell = GetCell(word.BeforeStartCell.Coord);
-            wordCell?.CopyFrom(word.BeforeStartCell);
+            //var wordCell = GetCell(word.BeforeStartCell.Coord);
+            //wordCell?.SetLetter(word.BeforeStartCell);
 
-            wordCell = GetCell(word.AfterEndCell.Coord);
-            wordCell?.CopyFrom(word.AfterEndCell);
+            //wordCell = GetCell(word.AfterEndCell.Coord);
+            //wordCell?.SetLetter(word.AfterEndCell);
+
+            RefreshAnchorList();
+        }
+
+        private void RefreshAnchorList()
+        {
+            var toRemove=new List<CrossWordCell>();
+            foreach (var anchor in AnchorCellsList)
+            {
+                var (before, after) = GetSpaceAroundAnchorCell(anchor);
+                anchor.SpaceBefore = before;
+                anchor.SpaceAfter = after;
+                if (before==0 && after==0)
+                {
+                   toRemove.Add(anchor);
+                }
+            }
+        }
+
+        public CrossingIndex SelectRandomAnchor(string word, CrossWordDirection direction)
+        {
+            var crossIndexList = new List<CrossingIndex>();
+            foreach (var anchor in AnchorCellsList)
+            {
+                var list = GetCrossingIndexListForAnchorCell(word, direction, anchor);
+                crossIndexList.AddRange(list);
+            }
+
+            var selected = crossIndexList.PickRandom();
+            return selected;
+        }
+        public CrossingIndex SelectRandomAnchor(string word)
+        {
+            var crossIndexList = new List<CrossingIndex>();
+            foreach (var anchor in AnchorCellsList)
+            {
+                var list = GetCrossingIndexListForAnchorCell(word, CrossWordDirection.Horizontal, anchor);
+                crossIndexList.AddRange(list);
+                list = GetCrossingIndexListForAnchorCell(word, CrossWordDirection.Vertical, anchor);
+                crossIndexList.AddRange(list);
+            }
+
+            var selected = crossIndexList.PickRandom();
+            return selected;
         }
 
 
-        bool CanCrossCell(string word, CrossWordCell cell, CrossWordDirection direction)
+        List<CrossingIndex> GetCrossingIndexListForAnchorCell(string word, CrossWordDirection direction, CrossWordCell anchorCell)
         {
-            fff
-            // var corssWord = new CrossWordWord(word, coord, direction);
-            return false;
+            var crossIndexList = new List<CrossingIndex>();
+
+            if (word == null || anchorCell == null) return crossIndexList;
+            //can only cross a word with different direction
+            if (anchorCell.Direction == direction) return crossIndexList;
+
+            var indexList = word.GetAllIndexOf(anchorCell.Letter);
+            if (indexList.Count > 0)
+            {
+                foreach (var index in indexList)
+                {
+                    var (before, after) = word.GetSpaceAroundIndexPosition(index);
+                    if (before <= anchorCell.SpaceBefore && after <= anchorCell.SpaceAfter)
+                    {
+                        crossIndexList.Add(new CrossingIndex(index, anchorCell, direction, before, after));
+                    }
+                }
+            }
+
+            return crossIndexList;
         }
 
         bool CanFitOnGrid(string word, Coord coord, CrossWordDirection direction)
         {
-            var corssWord = new CrossWordWord(word, coord, direction);
+            var corssWord = new CrossWord(word, coord, direction);
             return false;
         }
 
@@ -88,40 +179,62 @@ namespace WiktionaireParser.Models.CrossWord
 
         }
 
-        (int behind, int infront) GetSpaceAroundAnchorCell(CrossWordCell cell)
+       
+        (int before, int after) GetSpaceAroundAnchorCell(CrossWordCell cell)
         {
             if (cell == null) return (0, 0);
 
-            int spaceInFront = 0;
-            int spaceBehind = 0;
+            if (cell.ParentWord?.Count>=2)
+            {
+                return (0, 0);
+            }
+
+            int spaceAfter = 0;
+            int spaceBefore = 0;
 
             int row = cell.Coord.Row;
             int col = cell.Coord.Col;
 
 
-            //space in front 
+            //space after
             var direction = cell.Direction == CrossWordDirection.Horizontal ? CrossWordDirection.Vertical : CrossWordDirection.Horizontal;
 
             var nextCoord = cell.Coord.GetNextCoord(direction);
             var next = GetCell(nextCoord);
-            while (next != null)
+            var valid = true;
+            while (next != null && valid == true)
             {
-                spaceInFront += 1;
-                nextCoord = nextCoord.GetNextCoord(direction);
-                next = GetCell(nextCoord);
+
+                var voisin = GetVoisins(next).Where(c => c.Coord.Equals(cell.Coord) == false);
+                valid = voisin.All(v => v.IsEmpty == true);
+                if (valid)
+                {
+                    spaceAfter += 1;
+                    nextCoord = nextCoord.GetNextCoord(direction);
+                    next = GetCell(nextCoord);
+                }
+
+
             }
 
 
-            //space behind 
+            //space before 
             nextCoord = cell.Coord.GetPreviousCoord(direction);
             next = GetCell(nextCoord);
-            while (next != null)
+            valid = true;
+            while (next != null && valid == true)
             {
-                spaceBehind += 1;
-                nextCoord = nextCoord.GetPreviousCoord(direction);
-                next = GetCell(nextCoord);
+                var voisin = GetVoisins(next).Where(c => c.Coord.Equals(cell.Coord) == false);
+                valid = voisin.All(v => v.IsEmpty == true);
+                if (valid)
+                {
+                    spaceBefore += 1;
+                    nextCoord = nextCoord.GetPreviousCoord(direction);
+                    next = GetCell(nextCoord);
+                }
+
             }
-            return (spaceBehind, spaceInFront);
+            return (spaceBefore, spaceAfter);
         }
 
         /// <summary>

@@ -79,7 +79,7 @@ namespace CommonLibTools.Extensions
             {58,'6'},{59,'7'},
             {60,'8'},{61,'9'},
             {62,'+'},{63,'/'},
-            
+
         };
 
         public static string Int32ToBase16(this int val)
@@ -179,7 +179,7 @@ namespace CommonLibTools.Extensions
 
         #endregion
 
-        
+
         //public static string ToJson(this object obj)
         //{
         //    var json = JsonConvert.SerializeObject(obj,Formatting.Indented);
@@ -192,6 +192,40 @@ namespace CommonLibTools.Extensions
         //}
 
 
+        public static List<int> GetAllIndexOf(this string word, string car)
+        {
+            var foundIndexes = new List<int>();
+
+            if (word == null) return foundIndexes;
+
+            for (int i = 0; i < word.Length; i++)
+            {
+                if (word[i].ToString() == car) foundIndexes.Add(i);
+            }
+
+            return foundIndexes;
+        }
+
+        public static (int beforeIndex, int afterIndex) GetSpaceAroundIndexPosition(this string word, int index)
+        {
+            if (word == null)
+            {
+                return (0, 0);
+            }
+            var spaceBeforeIndex = 0;
+            for (int i = 0; i < index; i++)
+            {
+                spaceBeforeIndex++;
+            }
+
+            var spaceAfterIndex = 0;
+            for (int i = index + 1; i < word.Length; i++)
+            {
+                spaceAfterIndex++;
+            }
+            return (spaceBeforeIndex, spaceAfterIndex);
+        }
+
         public static string ReplaceAtPosition(this string text, int pos, char val)
         {
             var charArray = text.ToCharArray();
@@ -201,7 +235,7 @@ namespace CommonLibTools.Extensions
             //return insert;
         }
 
-        
+
 
         public static bool ContainsAnyLetter(this string aString, string letters)
         {

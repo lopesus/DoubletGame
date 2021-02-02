@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CommonLibTools;
+using CommonLibTools.Extensions;
 using PathFindingModel;
 using WiktionaireParser.Models.CrossWord;
 
@@ -34,6 +36,7 @@ namespace WiktionaireParser.ui
         {
             "CRUE",
             "CURE",
+            "recu",
             "ECRU",
             "CRU",
             "CUE",
@@ -44,9 +47,13 @@ namespace WiktionaireParser.ui
             "RUE",
             "URE",
         };
+
+        private List<string> wordListCopy = new List<string>();
         public CrossWordGridGen()
         {
             InitializeComponent();
+
+            wordListCopy = wordList.ToList();
         }
         public UICell GetUICell(Coord coord)
         {
@@ -63,39 +70,68 @@ namespace WiktionaireParser.ui
 
         }
 
+        string GetNextWord()
+        {
+           // var word = wordListCopy.PickRandom();
+            var word = wordListCopy.FirstOrDefault();
+            wordListCopy.Remove(word);
+            return word?.ToLowerInvariant();
+        }
 
         private void cmdPutNextWord_Click(object sender, RoutedEventArgs e)
         {
+            string word = GetNextWord();
             if (WordGrid.IsEmpty)
             {
-                PutWordAt("cure", new Coord(3, 4), CrossWordDirection.Horizontal);
+                var list = WordGrid.GetStartingCoordFor(word);
+                var startingPosition = list.PickRandom();
+                PutWordAt(word, startingPosition.Coord, startingPosition.Direction);
+            }
+            else
+            {
+                var crossingIndexHoriz = WordGrid.SelectRandomAnchor(word, CrossWordDirection.Horizontal);
+                var crossingIndexVert = WordGrid.SelectRandomAnchor(word, CrossWordDirection.Vertical);
+                var crossingIndex = WordGrid.SelectRandomAnchor(word);
+                Console.WriteLine();
+
+                if (crossingIndex != null)
+                {
+                    var start = crossingIndex.StartCoord;
+                    PutWordAt(word,start,crossingIndex.Direction);
+                }
+                else
+                {
+                    MessageBox.Show($"NO CROSSING for {word}".ToUpper());
+                }
             }
         }
-
+        
         void PutWordAt(string word, Coord coord, CrossWordDirection direction)
         {
 
-            CrossWordWord crossWordWord = new CrossWordWord(word, coord, direction);
-            WordGrid.PutWordAt(crossWordWord, coord, direction);
+            CrossWord crossWord = new CrossWord(word, coord, direction);
+            WordGrid.PutWordAt(crossWord, coord, direction);
 
-            foreach (var crossWordCell in crossWordWord.WordCellsList)
+            foreach (var crossWordCell in crossWord.WordLetterList)
             {
                 var cellCoord = crossWordCell.Coord;
                 var uiCell = UIMazeCellList[cellCoord.Row, cellCoord.Col];
                 uiCell.SetWord(crossWordCell);
             }
 
-            var uiCell2 = GetUICell(crossWordWord.BeforeStartCell.Coord);
-            if (uiCell2 != null)
-            {
-                uiCell2.SetWord(crossWordWord.BeforeStartCell);
-            }
+            //var uiCell2 = GetUICell(crossWord.BeforeStartCell.Coord);
+            //if (uiCell2 != null)
+            //{
+            //    uiCell2.SetWord(crossWord.BeforeStartCell);
+            //}
 
-            uiCell2 = GetUICell(crossWordWord.AfterEndCell.Coord);
-            if (uiCell2 != null)
-            {
-                uiCell2.SetWord(crossWordWord.AfterEndCell);
-            }
+            //uiCell2 = GetUICell(crossWord.AfterEndCell.Coord);
+            //if (uiCell2 != null)
+            //{
+            //    uiCell2.SetWord(crossWord.AfterEndCell);
+            //}
+
+            RefreshUIGrid();
         }
 
         private void cmdGenGrid_Click(object sender, RoutedEventArgs e)
@@ -131,9 +167,22 @@ namespace WiktionaireParser.ui
                     return 0;
             }
         }
+
+        void RefreshUIGrid()
+        {
+            for (int col = 0; col < NumCol; col++)
+            {
+                for (int row = 0; row < NumRow; row++)
+                {
+                   var uiCell= UIMazeCellList[row, col];
+                   uiCell.UpdateData();
+                }
+            }
+        }
         public void SetMaze()
         {
             mainCanvas.Children.Clear();
+            wordListCopy = wordList.ToList();
 
             WordGrid = new CrossWordGrid(NumRow, NumCol);
 

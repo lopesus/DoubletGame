@@ -4,25 +4,25 @@ using PathFindingModel;
 
 namespace WiktionaireParser.Models.CrossWord
 {
-    public class CrossWordWord
+    public class CrossWord
     {
         public Coord StartCoord;
         public Coord EndCoord;
         public string Word { get; set; }
         public CrossWordDirection Direction { get; set; }
-        public List<CrossWordCell> WordCellsList { get; set; }
+        public List<CrossWordLetter> WordLetterList { get; set; }
 
         public CrossWordCell BeforeStartCell;
         public CrossWordCell AfterEndCell;
 
 
 
-        public CrossWordWord(string word, Coord coord, CrossWordDirection direction)
+        public CrossWord(string word, Coord coord, CrossWordDirection direction)
         {
             this.Word = word;
             Direction = direction;
             StartCoord = coord;
-            WordCellsList = new List<CrossWordCell>();
+            WordLetterList = new List<CrossWordLetter>();
             switch (direction)
             {
                 case CrossWordDirection.Horizontal:
@@ -42,15 +42,17 @@ namespace WiktionaireParser.Models.CrossWord
                         var car = word[index];
                         var cellCoord = new Coord(coord.Row, coord.Col + index);
 
-                        CrossWordCell wordCell = new CrossWordCell(car, cellCoord, direction, this);
-                        WordCellsList.Add(wordCell);
+                        CrossWordLetter wordCell = new CrossWordLetter(car, cellCoord, direction, this);
+                        WordLetterList.Add(wordCell);
                     }
 
                     BeforeStartCell =  new CrossWordCell(StartCoord.GetLeftCoord());
                     BeforeStartCell.ExcludedFromMaze = true;
+                    BeforeStartCell.IsEmpty = true;
 
                     AfterEndCell = new CrossWordCell(EndCoord.GetRightCoord());
                     AfterEndCell.ExcludedFromMaze = true;
+                    AfterEndCell.IsEmpty = true;
 
 
                     break;
@@ -60,8 +62,8 @@ namespace WiktionaireParser.Models.CrossWord
                         var car = word[index];
                         var cellCoord = new Coord(coord.Row + index, coord.Col);
 
-                        CrossWordCell wordCell = new CrossWordCell(car, cellCoord, direction, this);
-                        WordCellsList.Add(wordCell);
+                        CrossWordLetter wordCell = new CrossWordLetter(car, cellCoord, direction, this);
+                        WordLetterList.Add(wordCell);
                     }
 
                     BeforeStartCell = new CrossWordCell(StartCoord.GetUpCoord());

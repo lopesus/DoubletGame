@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CommonLibTools;
 using PathFindingModel;
 
@@ -11,44 +12,45 @@ namespace WiktionaireParser.Models.CrossWord
         public bool IsEmpty { get; set; }
         public CrossWordDirection Direction { get; set; }
 
-        public int SpaceBehind { get; set; }
-        public int SpaceInFront { get; set; }
+        public int SpaceBefore { get; set; }
+        public int SpaceAfter { get; set; }
 
-        public CrossWordWord ParentWord { get; set; }
+        public List<CrossWord> ParentWord { get; set; }
 
         public bool ExcludedFromMaze { get; set; }
         public CrossWordCell(Coord coord)
         {
+            ParentWord = new List<CrossWord>();
             this.Coord = coord;
             IsEmpty = true;
             Letter = "";
         }
 
-        public CrossWordCell( char car, Coord cellCoord, CrossWordDirection direction, CrossWordWord crossWordWord)
+        public CrossWordCell( char car, Coord cellCoord, CrossWordDirection direction, CrossWord crossWord)
         {
             Letter = car.ToString();
             Coord = cellCoord;
             Direction = direction;
-            ParentWord = crossWordWord;
+            ParentWord = new List<CrossWord>();
+            ParentWord.Add(crossWord);
             IsEmpty = false;
         }
 
-        public void CopyFrom(CrossWordCell fromCell)
+        public void SetLetter(CrossWordLetter letter)
         {
-            Letter = fromCell.Letter;
-            IsEmpty = fromCell.IsEmpty;
-            Direction = fromCell.Direction;
-            ParentWord = fromCell.ParentWord;
-            ExcludedFromMaze = fromCell.ExcludedFromMaze;
-
-            SpaceBehind = fromCell.SpaceBehind;
-            SpaceInFront = fromCell.SpaceInFront;
-            
+            Letter = letter.Letter;
+            IsEmpty = false;
+            Direction = letter.Direction;
+            ParentWord.Add(letter.ParentWord);
+            if (ParentWord.Count>=2)
+            {
+                Console.WriteLine();
+            }
         }
 
         public override string ToString()
         {
-            return $"{Coord} -  {Letter} - {Direction}, behind:{SpaceBehind} - after:{SpaceInFront}";
+            return $"{Coord} -  {Letter} - {Direction}, behind:{SpaceBefore} - after:{SpaceAfter}";
         }
     }
 }

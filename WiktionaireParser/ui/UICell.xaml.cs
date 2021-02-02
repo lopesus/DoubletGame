@@ -57,20 +57,20 @@ namespace WiktionaireParser.ui
         }
 
 
-        public void SetWord(CrossWordCell wordCell)
+        public void SetWord(CrossWordLetter wordCell)
         {
             Letter = wordCell.Letter;
            
-            this.WordCell.CopyFrom(wordCell);
+            //this.WordCell.SetLetter(wordCell);
             
             UpdateData();
         }
 
-        private void UpdateData()
+        public void UpdateData()
         {
             tblLetter.Text = Letter.ToUpper();
-            txtBehind.Text = WordCell.SpaceBehind.ToString();
-            txtInFront.Text = WordCell.SpaceInFront.ToString();
+            txtBehind.Text = WordCell.SpaceBefore.ToString();
+            txtInFront.Text = WordCell.SpaceAfter.ToString();
 
             if (WordCell.IsEmpty)
             {
