@@ -10,8 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using PathFindingModel;
-using WiktionaireParser.Models.CrossWord;
+using CommonLibTools.Libs;
+using CommonLibTools.Libs.CrossWord;
 
 namespace WiktionaireParser.ui
 {
@@ -52,6 +52,7 @@ namespace WiktionaireParser.ui
             Canvas.SetTop(this, WordCell.Coord.Row * CellSize);
 
             txtCoord.Text = WordCell.Coord.ToString();
+            txtOrthoCoord.Text = WordCell.OrthoCoord.ToString();
             Width = Height = CellSize;
 
             Init();

@@ -8,6 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="50"/>
@@ -17,22 +18,31 @@
             <RowDefinition Height="55"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Viewbox Grid.Row="2" OpacityMask="#FF8B2626" Grid.Column="1">
-            <Canvas x:Name="mainCanvas" Height="900" Width="900" Background="#FF8CA2A4"/>
-        </Viewbox>
-        <Canvas Grid.Column="1" Background="#FFD89F9F">
+        <Grid Grid.Column="2" Grid.Row="2" Background="#FF839367">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ListBox x:Name="lbxFitWord" SelectionChanged="lbxFitWord_SelectionChanged"/>
+            <Viewbox OpacityMask="#FF8B2626" Grid.Column="1">
+                <Canvas x:Name="mainCanvas" Height="900" Width="900" Background="#FF8CA2A4" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            </Viewbox>
+        </Grid>
+        <Canvas Background="#FFD89F9F" Grid.ColumnSpan="3" Margin="0,0,0,0">
             <Button x:Name="cmdGenGrid" Content="gen grid" Click="cmdGenGrid_Click" Width="75" Height="30"/>
             <Button x:Name="cmdPutNextWord" Content="NEXT WORD" Click="cmdPutNextWord_Click" Canvas.Left="104" Canvas.Top="2" Width="75" Height="30"/>
             <Button x:Name="cmdGenFullGrid" Content="gen full grid" Click="cmdGenFullGrid_Click" Canvas.Left="212" Canvas.Top="2" Width="75" Height="30"/>
             <Button x:Name="cmdGenMany" Content="gen many" Canvas.Left="302" Canvas.Top="2" Width="75" Height="30" Click="cmdGenMany_Click"/>
-            <TextBox x:Name="txtWordForGrid" Height="20" Canvas.Left="394" Canvas.Top="10" Text="amer" TextWrapping="Wrap" Width="67"/>
+            <TextBox x:Name="txtWordForGrid" Height="20" Canvas.Left="394" Canvas.Top="10" Text="cube" TextWrapping="Wrap" Width="67"/>
             <ComboBox x:Name="cbsGridSize" Height="20" Canvas.Left="476" Canvas.Top="10" Width="64" SelectionChanged="cbsGridSize_SelectionChanged"/>
+            <TextBlock x:Name="tblResultCount" Height="28" Canvas.Left="10" Canvas.Top="35" Text="TextBlock" TextWrapping="Wrap" Width="207"/>
         </Canvas>
-        <ListBox x:Name="lbxGeneators" Grid.Row="2" SelectionChanged="lbxGeneators_SelectionChanged"/>
-        <Grid Grid.ColumnSpan="3" Grid.Row="1" Background="#FFB06868">
+        <ListBox x:Name="lbxGeneators" Grid.Row="2" SelectionChanged="lbxGeneators_SelectionChanged" Grid.Column="1"/>
+        <Grid Grid.ColumnSpan="4" Grid.Row="1" Background="#FFB06868" Margin="0,0,0,0">
             <TextBlock x:Name="tblAllWord" Text="TextBlock" TextWrapping="Wrap" Height="30" FontWeight="Bold"/>
 
         </Grid>
+        <ListBox x:Name="lbxDicoCrossWord" Grid.Row="2" Margin="5" SelectionChanged="lbxDicoCrossWord_SelectionChanged"/>
 
     </Grid>
 </UserControl>

@@ -4,8 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CommonLibTools.DataStructure.Dawg;
-using CommonLibTools.DataStructure.Dawg.Construction;
+using CommonLibTools.Libs.DataStructure.Dawg.Construction;
 
 namespace Test
 {
@@ -16,7 +15,7 @@ namespace Test
         {
             //constructTrie.GenerateTrieFromFile(@"C:\Users\mboum\Desktop\web\verbes\ods8_final.txt");
             //constructTrie.GenerateTrieFromFile(@"G:\zzzWiktionnaire\DICO\ODS7.txt");
-            constructTrie.GenerateTrieFromFile(@"D:\__programs_datas\wiki_valid_word.txt");
+            constructTrie.GenerateTrieFromFile(@"D:\__programs_datas\ods8_final_no_verbs_4_to_7.txt");
 
 
             //var text = File.ReadAllText(@"D:\__programs_datas\wiki_valid_word_trie.txt");

@@ -11,10 +11,11 @@
             <Image x:Name="image" Height="50" Width="50" Margin="-2"/>
         </Border>
         <TextBlock x:Name="txtCoord" TextWrapping="Wrap" Text="x20 y30" Foreground="Black" Panel.ZIndex="10" FontWeight="Bold" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0"/>
-        <TextBlock x:Name="txtBehind" HorizontalAlignment="Left" Height="30" Margin="0,0,0,1" TextWrapping="Wrap" Text="100" VerticalAlignment="Bottom" Width="30" FontSize="20" TextAlignment="Center" Foreground="#FFD10808" FontWeight="Bold" Panel.ZIndex="10"/>
+        <TextBlock x:Name="txtBehind" HorizontalAlignment="Left" Height="30" Margin="0,0,0,23" TextWrapping="Wrap" Text="100" VerticalAlignment="Bottom" Width="30" FontSize="20" TextAlignment="Center" Foreground="#FFD10808" FontWeight="Bold" Panel.ZIndex="10"/>
         <TextBlock x:Name="txtHCost" HorizontalAlignment="Left" Height="16" Margin="0,0,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="17" Foreground="#FF005116" FontSize="9" FontWeight="Bold" Panel.ZIndex="10"/>
-        <TextBlock x:Name="txtInFront" HorizontalAlignment="Right" Height="30" Margin="0,0,0,-1" TextWrapping="Wrap" Text="100" VerticalAlignment="Bottom" Width="30" Foreground="#FFAE00FF" FontSize="20" FontWeight="Bold" Panel.ZIndex="10"/>
-        <TextBlock x:Name="tblLetter" Text="z" TextWrapping="Wrap" FontWeight="Bold" FontSize="72" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+        <TextBlock x:Name="txtInFront" HorizontalAlignment="Right" Height="30" Margin="0,0,-2,23" TextWrapping="Wrap" Text="100" VerticalAlignment="Bottom" Width="30" Foreground="#FFAE00FF" FontSize="20" FontWeight="Bold" Panel.ZIndex="10"/>
+        <TextBlock x:Name="tblLetter" Text="z" TextWrapping="Wrap" FontWeight="Bold" FontSize="60" VerticalAlignment="Center" HorizontalAlignment="Center" Height="96"/>
+        <TextBlock x:Name="txtOrthoCoord" TextWrapping="Wrap" Text="x20 y30" Foreground="Black" Panel.ZIndex="10" FontWeight="Bold" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,71,0,0"/>
 
     </Grid>
 </UserControl>

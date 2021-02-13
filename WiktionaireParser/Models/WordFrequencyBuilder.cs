@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Media.Animation;
 using CommonLibTools;
+using CommonLibTools.Libs;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace WiktionaireParser.Models

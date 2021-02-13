@@ -111,7 +111,17 @@
                 </Grid>
             </TabItem>
             <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="213"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="17*"/>
+                        <RowDefinition Height="159*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="cmdRemoveVerbFromScrabbleDico" Content="Remove Verb From Scrabble Dico" HorizontalAlignment="Center" Height="51" Margin="0,24,0,0" VerticalAlignment="Top" Width="148" Click="cmdRemoveVerbFromScrabbleDico_Click"/>
+                </Grid>
             </TabItem>
             <TabItem Header="ParseDump" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
                 <Grid Background="#FFE5E5E5">

@@ -16,10 +16,13 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using CommonLibTools;
-using CommonLibTools.DataStructure.Dawg;
-using CommonLibTools.DataStructure.Dawg.Construction;
+using CommonLibTools.Libs;
+using CommonLibTools.Libs.DataStructure.Dawg;
+using CommonLibTools.Libs.DataStructure.Dawg.Construction;
+using CommonLibTools.Libs.Extensions;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
+using Path = System.IO.Path;
 
 namespace WiktionaireParser
 {
@@ -49,6 +52,10 @@ namespace WiktionaireParser
         ConstructTrie constructTrie = new ConstructTrie();
         public static Trie Trie;
         public static DawgService DawgService;
+
+       public static string DicoName = @"D:\__programs_datas\ods8_final_no_verbs_4_to_7.txt";
+       public static string DicoTrieName = @"D:\__programs_datas\ods8_final_no_verbs_4_to_7_trie.txt";
+
         public MainWindow()
         {
 
@@ -91,15 +98,18 @@ namespace WiktionaireParser
             var anagrams = anagramCollection.Find(FilterDefinition<Anagram>.Empty).ToList();
             anagramBuilder = new AnagramBuilder(anagrams);
 
-           // LoadTrie();
+            // LoadTrie();
         }
 
         private void LoadTrie()
         {
-            var lines = File.ReadAllLines(@"D:\__programs_datas\wiki_valid_word_trie.txt");
+            var lines = File.ReadAllLines(DicoTrieName);
 
             DawgService = new DawgService(lines);
             Trie = DawgService.GetTrie();
+
+            
+
         }
 
         private void cmdSerachFilter_Click(object sender, RoutedEventArgs e)
@@ -373,8 +383,8 @@ namespace WiktionaireParser
         {
             try
             {
-                var page = anagramBuilder.GetAnagramFor(key);
-                //var page = await anagramCollection.Find(x => x.Key == key).FirstAsync();//.Limit(1).ToListAsync();
+                //var page = anagramBuilder.GetAnagramFor(key);
+                var page = await anagramCollection.Find(x => x.Key == key).FirstAsync();//.Limit(1).ToListAsync();
                 var all = string.Join("\r\n", page.AnagramList);
                 txtAnagrams.Text = all;
 
@@ -405,6 +415,71 @@ namespace WiktionaireParser
             }
         }
 
+        private async void cmdRemoveVerbFromScrabbleDico_Click(object sender, RoutedEventArgs e)
+        {
+            var fileName = @"C:\Users\mboum\Desktop\web\verbes\dico scrabble\ods8_final.txt";
 
+            //var dirPath = Path.GetFullPath(fileName);
+            var dirPath = Path.GetDirectoryName(fileName);
+            var name = Path.GetFileNameWithoutExtension(fileName);
+            var newName = $"{dirPath}\\{name}_no_verbs_4_to_7.txt";
+            // Fix(fileName);return;
+
+            var enumerable = wikiCollection.Find(FilterDefinition<WikiPage>.Empty)
+                .ToList().Select(m => m.TitleInv);
+            var set = new HashSet<string>(enumerable);
+            var valids = set.ToDictionary(p => p, p => p.Length);
+            var singular = new Dictionary<string, bool>();
+
+            var lines = File.ReadAllLines(fileName);
+
+            var final = new StringBuilder();
+
+            foreach (var mot in lines.OrderBy(m => m.Length).Where(m => m.Length >= 3 && m.Length <= 7))
+            {
+                if (valids.ContainsKey(mot))
+                {
+                    ////check french plural form
+                    //if (mot.EndsWith("s"))
+                    //{
+                    //    var singularForm = mot.TrimEnd("s");
+                    //    if (singular.ContainsKey(singularForm) == false)
+                    //    {
+                    //        final.AppendLine(mot);
+
+                    //    }
+                    //}
+                    //else
+                    {
+                        singular[mot] = true;
+                        final.AppendLine(mot);
+                    }
+                }
+
+            }
+            File.WriteAllText(newName, final.ToString());
+            MessageBox.Show("done");
+        }
+
+        void Fix(string fileName)
+        {
+            var lines = File.ReadAllLines(fileName);
+            var result = new StringBuilder();
+            foreach (var line in lines)
+            {
+                var tokens = line.Split();
+                foreach (var token in tokens)
+                {
+                    if (token.Trim().IsNotNullOrEmptyString())
+                    {
+                        var mot = token.ToLowerInvariant().RemoveDiacritics();
+                        result.AppendLine(mot);
+                    }
+                }
+            }
+
+            File.WriteAllText(fileName, result.ToString());
+            MessageBox.Show("done");
+        }
     }
 }

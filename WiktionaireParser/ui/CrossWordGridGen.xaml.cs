@@ -13,10 +13,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CommonLibTools;
-using CommonLibTools.DataStructure.Dawg;
-using CommonLibTools.Extensions;
-using PathFindingModel;
-using WiktionaireParser.Models.CrossWord;
+using CommonLibTools.Libs;
+using CommonLibTools.Libs.CrossWord;
+using CommonLibTools.Libs.DataStructure.Dawg;
+using CommonLibTools.Libs.Extensions;
 
 namespace WiktionaireParser.ui
 {
@@ -65,6 +65,9 @@ namespace WiktionaireParser.ui
             wordListCopy = wordList.ToList();
             cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
             cbsGridSize.SelectedIndex = 2;
+
+            var lines = File.ReadAllLines(MainWindow.DicoName);
+            lbxDicoCrossWord.ItemsSource = lines;
         }
         public UICell GetUICell(Coord coord)
         {
@@ -96,9 +99,33 @@ namespace WiktionaireParser.ui
             if (gen != null)
             {
                 DrawGrid(gen);
+                lbxFitWord.ItemsSource = gen.FitWordList;
             }
         }
 
+        void GenAll(List<string> listOfWords, int size)
+        {
+            int take = 10000;
+            var result = new List<GenGrid>();
+            listOfWords = listOfWords.OrderByDescending(d => d.Length).ToList();
+            var testGrid = new CrossWordGrid(NumRow, NumCol);
+            var word = listOfWords.First().ToLowerInvariant();
+            //listOfWords.Remove(word);
+            var startingPositions = testGrid.GetStartingCoordFor(word);
+
+            foreach (var startingPosition in startingPositions.Take(take))
+            {
+                //testGrid = new CrossWordGrid(NumRow, NumCol);
+                var generator = new GenGrid(NumRow, NumCol, listOfWords, startingPosition, result);
+
+                //result.Add(generator);
+            }
+
+            tblResultCount.Text = $"gen many {result.Count}";
+            lbxGeneators.ItemsSource = result
+                .OrderByDescending(g => g.FitWordList.Count)
+                .ThenBy(g => g.Grid.BaryDistance);
+        }
 
         private void cmdGenMany_Click(object sender, RoutedEventArgs e)
         {
@@ -121,7 +148,9 @@ namespace WiktionaireParser.ui
 
             var temp = string.Join(" ", list1);
             tblAllWord.Text = temp;
-            GenerateManyGrid(list1, gridSize);
+
+            //GenerateManyGrid(list1, gridSize);
+            GenAll(list1, gridSize);
         }
 
         void GenerateManyGrid(List<string> aList, int size)
@@ -135,10 +164,13 @@ namespace WiktionaireParser.ui
             foreach (var startingPosition in startingPositions.Take(take))
             {
                 var generator = new CrossWordGenerator(size, size, wordList, startingPosition);
+
                 result.Add(generator);
             }
 
-            lbxGeneators.ItemsSource = result.OrderByDescending(g => g.FitWordList.Count);
+            lbxGeneators.ItemsSource = result
+                .OrderByDescending(g => g.FitWordList.Count)
+                .ThenBy(g => g.Grid.BaryDistance);
         }
 
         public void DrawGrid(CrossWordGenerator generator)
@@ -223,8 +255,8 @@ namespace WiktionaireParser.ui
             }
             else
             {
-                var crossingIndexHoriz = Grid.SelectRandomAnchor(word, CrossWordDirection.Horizontal);
-                var crossingIndexVert = Grid.SelectRandomAnchor(word, CrossWordDirection.Vertical);
+                // var crossingIndexHoriz = Grid.SelectRandomAnchor(word, CrossWordDirection.Horizontal);
+                // var crossingIndexVert = Grid.SelectRandomAnchor(word, CrossWordDirection.Vertical);
                 var crossingIndex = Grid.SelectRandomAnchor(word);
                 Console.WriteLine();
 
@@ -346,10 +378,24 @@ namespace WiktionaireParser.ui
 
         private void cbsGridSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int size = (int) cbsGridSize.SelectedValue;
+            int size = (int)cbsGridSize.SelectedValue;
 
             NumRow = size;
             NumCol = size;
+        }
+
+        private void lbxFitWord_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void lbxDicoCrossWord_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var mot = lbxDicoCrossWord.SelectedItem as string;
+            if (mot != null)
+            {
+                txtWordForGrid.Text = mot;
+            }
         }
     }
 }
