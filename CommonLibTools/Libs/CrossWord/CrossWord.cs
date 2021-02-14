@@ -4,10 +4,12 @@ namespace CommonLibTools.Libs.CrossWord
 {
     public class CrossWord
     {
-        public Coord StartCoord;
-        public Coord EndCoord;
-        public string Word { get; set; }
+
+        public Coord Coord;
         public CrossWordDirection Direction { get; set; }
+        public string Word { get; set; }
+
+        public Coord EndCoord;
         public List<CrossWordLetter> WordLetterList { get; set; }
 
         public CrossWordCell BeforeStartCell;
@@ -19,7 +21,7 @@ namespace CommonLibTools.Libs.CrossWord
         {
             this.Word = word;
             Direction = direction;
-            StartCoord = coord;
+            Coord = coord;
             WordLetterList = new List<CrossWordLetter>();
             switch (direction)
             {
@@ -44,7 +46,7 @@ namespace CommonLibTools.Libs.CrossWord
                         WordLetterList.Add(wordCell);
                     }
 
-                    BeforeStartCell =  new CrossWordCell(StartCoord.GetLeftCoord());
+                    BeforeStartCell = new CrossWordCell(Coord.GetLeftCoord());
                     BeforeStartCell.ExcludedFromMaze = true;
                     BeforeStartCell.IsEmpty = true;
 
@@ -64,7 +66,7 @@ namespace CommonLibTools.Libs.CrossWord
                         WordLetterList.Add(wordCell);
                     }
 
-                    BeforeStartCell = new CrossWordCell(StartCoord.GetUpCoord());
+                    BeforeStartCell = new CrossWordCell(Coord.GetUpCoord());
                     BeforeStartCell.ExcludedFromMaze = true;
 
                     AfterEndCell = new CrossWordCell(EndCoord.GetDownCoord());
@@ -75,7 +77,7 @@ namespace CommonLibTools.Libs.CrossWord
 
         public override string ToString()
         {
-            return $"{Word} - {StartCoord} - {Direction}";
+            return $"{Word} - {Coord} - {Direction}";
         }
     }
 }

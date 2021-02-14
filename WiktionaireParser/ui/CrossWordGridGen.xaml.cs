@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,6 +19,7 @@ using CommonLibTools.Libs;
 using CommonLibTools.Libs.CrossWord;
 using CommonLibTools.Libs.DataStructure.Dawg;
 using CommonLibTools.Libs.Extensions;
+using Newtonsoft.Json;
 
 namespace WiktionaireParser.ui
 {
@@ -52,6 +55,7 @@ namespace WiktionaireParser.ui
 
         private List<string> wordListCopy = new List<string>();
         private int gridSize;
+        private string[] AllWords;
 
         List<CrossWord> fitOnGridList { get; set; }
 
@@ -66,8 +70,8 @@ namespace WiktionaireParser.ui
             cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
             cbsGridSize.SelectedIndex = 2;
 
-            var lines = File.ReadAllLines(MainWindow.DicoName);
-            lbxDicoCrossWord.ItemsSource = lines;
+            AllWords = File.ReadAllLines(MainWindow.DicoName);
+            lbxDicoCrossWord.ItemsSource = AllWords;
         }
         public UICell GetUICell(Coord coord)
         {
@@ -103,35 +107,104 @@ namespace WiktionaireParser.ui
             }
         }
 
-        void GenAll(List<string> listOfWords, int size)
+
+
+        private void cmdGenGameLevel_Click(object sender, RoutedEventArgs e)
         {
-            int take = 10000;
-            var result = new List<GenGrid>();
-            listOfWords = listOfWords.OrderByDescending(d => d.Length).ToList();
-            var testGrid = new CrossWordGrid(NumRow, NumCol);
-            var word = listOfWords.First().ToLowerInvariant();
-            //listOfWords.Remove(word);
-            var startingPositions = testGrid.GetStartingCoordFor(word);
-
-            foreach (var startingPosition in startingPositions.Take(take))
-            {
-                //testGrid = new CrossWordGrid(NumRow, NumCol);
-                var generator = new GenGrid(NumRow, NumCol, listOfWords, startingPosition, result);
-
-                //result.Add(generator);
-            }
-
-            tblResultCount.Text = $"gen many {result.Count}";
-            lbxGeneators.ItemsSource = result
-                .OrderByDescending(g => g.FitWordList.Count)
-                .ThenBy(g => g.Grid.BaryDistance);
+            SelectLevel();
         }
+        void SelectLevel()
+        {
+            ParallelOptions options = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 12
+            };
+            gridSize = 7;
+            DawgService = MainWindow.DawgService;
+            ConcurrentBag<GenGrid> genGrids = new ConcurrentBag<GenGrid>();
+            ConcurrentDictionary<string, List<string>> selectedWord = new ConcurrentDictionary<string, List<string>>();
 
+
+            Parallel.ForEach(AllWords.Where(w => w.Length >= 4), options, allWord =>
+            {
+                var word = allWord.ToLowerInvariant().RemoveDiacritics();
+                var allPossibleWord = DawgService.FindAllPossibleWord(word);
+                var set = new HashSet<string>();
+                foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p => p.Key > 2))
+                {
+                    set.UnionWith(pair.Value);
+                }
+
+                var list1 = set.OrderByDescending(d => d.Length).ToList();
+                if (list1.Count >= 4)
+                {
+                    selectedWord.TryAdd(word, list1);
+                }
+            });
+
+
+            //foreach (var allWord in AllWords.Where(w => w.Length >= 4))
+            //{
+            //    var word = allWord.ToLowerInvariant().RemoveDiacritics();
+            //    var allPossibleWord = DawgService.FindAllPossibleWord(word);
+            //    var set = new HashSet<string>();
+            //    foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p => p.Key > 2))
+            //    {
+            //        set.UnionWith(pair.Value);
+            //    }
+
+            //    var list1 = set.OrderByDescending(d => d.Length).ToList();
+            //    if (list1.Count >= 4)
+            //    {
+            //        selectedWord.Add(word, list1);
+            //    }
+            //}
+
+            var wordsToTake = 2000;
+
+
+            Parallel.ForEach(selectedWord.Take(wordsToTake), options, allWord =>
+             {
+                 var word = allWord.Key;
+                 var list1 = allWord.Value;
+                 var result = GenAll(word, list1, gridSize);
+                 if (result?.Count > 0)
+                 {
+                     var grid = result.OrderByDescending(g => g.FitWordList.Count)
+                         .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
+
+                     genGrids.Add(grid);
+                 }
+             });
+
+            //foreach (var allWord in selectedWord.Take(wordsToTake))
+            //{
+            //    var word = allWord.Key;
+            //    var list1 = allWord.Value;
+            //    var result = GenAll(word, list1, gridSize);
+            //    var grid = result.OrderByDescending(g => g.FitWordList.Count)
+            //        .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
+
+            //    genGrids.Add(grid);
+            //}
+
+            lbxGeneators.ItemsSource = genGrids;
+            CrossWordGame crossWordGame = new CrossWordGame(Lang.Fr, genGrids.ToList());
+            var json = JsonConvert.SerializeObject(crossWordGame);
+
+            string folder = @"D:\__programs_datas\";
+            var gameDataPath = $"{folder}wordbox_{crossWordGame.Language}.json";
+            File.WriteAllText(gameDataPath, json);
+            Console.WriteLine(crossWordGame.Language);
+
+            MessageBox.Show($"{genGrids.Count} level generated - {selectedWord.Count} words treated ");
+
+        }
         private void cmdGenMany_Click(object sender, RoutedEventArgs e)
         {
             gridSize = (int)cbsGridSize.SelectedValue;
             DawgService = MainWindow.DawgService;
-            var text = txtWordForGrid.Text;
+            var text = txtWordForGrid.Text.ToLowerInvariant().RemoveDiacritics();
             if (text.IsNullOrEmptyString())
             {
                 text = "cure";
@@ -150,7 +223,45 @@ namespace WiktionaireParser.ui
             tblAllWord.Text = temp;
 
             //GenerateManyGrid(list1, gridSize);
-            GenAll(list1, gridSize);
+            var result = GenAll(text, list1, gridSize);
+            lbxGeneators.ItemsSource = result
+                .OrderByDescending(g => g.FitWordList.Count)
+                .ThenBy(g => g.Grid.BaryDistance);
+
+            tblResultCount.Text = $"gen many {result.Count}";
+
+        }
+
+
+        List<GenGrid> GenAll(string letters, List<string> listOfWords, int size)
+        {
+            int take = 10000;
+            var result = new List<GenGrid>();
+            listOfWords = listOfWords.OrderByDescending(d => d.Length).ToList();
+            var testGrid = new CrossWordGrid(NumRow, NumCol);
+            var word = listOfWords.First().ToLowerInvariant();
+            //listOfWords.Remove(word);
+            var startingPositions = testGrid.GetStartingCoordFor(word);
+
+            //foreach (var startingPosition in startingPositions.Take(take))
+            //{
+            //    //testGrid = new CrossWordGrid(NumRow, NumCol);
+            //    var generator = new GenGrid(NumRow, NumCol, listOfWords, startingPosition, result);
+
+            //    //result.Add(generator);
+            //}
+
+            ParallelOptions options = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 6
+            };
+            Parallel.ForEach(startingPositions, options, startingPosition =>
+            {
+                var generator = new GenGrid(size, size, letters, new List<string>(listOfWords), startingPosition, result);
+            });
+
+
+            return result;
         }
 
         void GenerateManyGrid(List<string> aList, int size)
@@ -175,7 +286,7 @@ namespace WiktionaireParser.ui
 
         public void DrawGrid(CrossWordGenerator generator)
         {
-            SetMaze();
+            SetMaze(generator.NumRow, generator.NumCol);
             var firstLetter = true;
             foreach (var crossWord in generator.FitWordList)
             {
@@ -191,7 +302,7 @@ namespace WiktionaireParser.ui
 
         private void cmdGenFullGrid_Click(object sender, RoutedEventArgs e)
         {
-            SetMaze();
+            SetMaze(NumRow, NumCol);
             GenFullCrossword();
         }
 
@@ -306,7 +417,7 @@ namespace WiktionaireParser.ui
 
         private void cmdGenGrid_Click(object sender, RoutedEventArgs e)
         {
-            SetMaze();
+            SetMaze(NumRow, NumCol);
         }
 
         public void GenerateGridForWord()
@@ -349,10 +460,12 @@ namespace WiktionaireParser.ui
                 }
             }
         }
-        public void SetMaze()
+        public void SetMaze(int gridRow, int gridCol)
         {
             mainCanvas.Children.Clear();
             wordListCopy = wordList.ToList();
+            NumRow = gridRow;
+            NumCol = gridCol;
 
             Grid = new CrossWordGrid(NumRow, NumCol);
 
@@ -397,5 +510,6 @@ namespace WiktionaireParser.ui
                 txtWordForGrid.Text = mot;
             }
         }
+
     }
 }

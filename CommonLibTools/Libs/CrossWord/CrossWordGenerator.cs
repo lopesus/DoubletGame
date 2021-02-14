@@ -9,6 +9,7 @@ namespace CommonLibTools.Libs.CrossWord
         public List<string> WordList { get; set; }
         public int NumCol { get; set; }
         public int NumRow { get; set; }
+        public string Letters { get; set; }
         public int WordCount { get; set; }
         public StartingPosition Position { get; set; }
         public CrossWordGrid Grid;
@@ -20,7 +21,7 @@ namespace CommonLibTools.Libs.CrossWord
 
         public float FitScore { get; set; }
 
-
+       
         public CrossWordGenerator()
         {
             

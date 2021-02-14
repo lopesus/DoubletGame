@@ -8,6 +8,7 @@ namespace CommonLibTools.Libs.CrossWord
 {
     public class GenGrid : CrossWordGenerator
     {
+        private static int branchLimit = 0;
         //public List<string> WordList { get; set; }
         //public int NumCol { get; set; }
         //public int NumRow { get; set; }
@@ -21,11 +22,13 @@ namespace CommonLibTools.Libs.CrossWord
         //public float FitScore { get; set; }
 
         private Queue<string> Queue;
-        public GenGrid(int numRow, int numCol, List<string> wordList, StartingPosition startingPosition, List<GenGrid> allGen)
+        public GenGrid(int numRow, int numCol, string levelLetters, List<string> wordList, StartingPosition startingPosition, List<GenGrid> allGen)
         {
             allGen.Add(this);
             NumRow = numRow;
             NumCol = numCol;
+            Letters = levelLetters;
+
             Position = startingPosition;
             WordList = wordList.OrderByDescending(d => d.Length).ToList();
             wordListCopy = WordList.ToList();
@@ -44,11 +47,13 @@ namespace CommonLibTools.Libs.CrossWord
 
         }
 
-        private GenGrid(int numRow, int numCol, int count, List<CrossWord> fitWordList, string word, List<string> wordList, CrossingIndex index, List<GenGrid> allGen)
+        private GenGrid(int numRow, int numCol, string levelLetters, int count, List<CrossWord> fitWordList, string word, List<string> wordList, CrossingIndex index, List<GenGrid> allGen)
         {
             allGen.Add(this);
             NumRow = numRow;
             NumCol = numCol;
+            Letters = levelLetters;
+
             WordCount = count;
             Position = new StartingPosition(index.StartCoord, index.Direction);
 
@@ -62,7 +67,7 @@ namespace CommonLibTools.Libs.CrossWord
             //fill the grid with already fitted words
             foreach (CrossWord crossWord in fitWordList)
             {
-                PutWordAt(crossWord.Word, crossWord.StartCoord, crossWord.Direction);
+                PutWordAt(crossWord.Word, crossWord.Coord, crossWord.Direction);
             }
 
             rejected = new Dictionary<string, int>();
@@ -92,13 +97,17 @@ namespace CommonLibTools.Libs.CrossWord
                 if (startPosList.Count > 0)
                 {
                     //compute for other anchor 
-                    Parallel.ForEach(startPosList.Skip(1).Take(10), (index) =>
+                    ParallelOptions options = new ParallelOptions()
                     {
-                        if (index != null)
-                        {
-                            new GenGrid(NumRow, NumCol, WordCount, FitWordList, word, wordListCopy, index, allGen);
-                        }
-                    });
+                        MaxDegreeOfParallelism = 6
+                    };
+                    Parallel.ForEach(startPosList.Skip(1).Take(branchLimit), options, index =>
+                     {
+                         if (index != null)
+                         {
+                             new GenGrid(NumRow, NumCol, Letters, WordCount, FitWordList, word, wordListCopy, index, allGen);
+                         }
+                     });
 
                     //foreach (var index in startPosList.Skip(1).Take(10))
                     //{
@@ -160,6 +169,7 @@ namespace CommonLibTools.Libs.CrossWord
         public override string ToString()
         {
             var builder = new StringBuilder();
+            builder.AppendLine(Letters);
             builder.AppendLine($"{FitWordList.Count} - {WordCount}");
             builder.AppendLine($"Bary {Grid.BaryDistance}");
             builder.AppendLine($"BaryRow {Grid.BaryRow} ");
