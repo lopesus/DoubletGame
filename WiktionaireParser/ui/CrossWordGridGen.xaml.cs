@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,6 +32,12 @@ namespace WiktionaireParser.ui
         private UICell[,] UIMazeCellList;
         public static int NumCol = 9;
         public static int NumRow = 9;
+        public static int BranchLimit = 0;
+        public static int DepthLimit = 3;
+        private DateTime start;
+        private DateTime end;
+
+        string frequencyDicoFileName = @"D:\__programs_datas\ods8_final_no_verbs_4_to_7_with_freq.txt";
 
         public CrossWordGrid Grid { get; set; }
 
@@ -55,7 +62,8 @@ namespace WiktionaireParser.ui
 
         private List<string> wordListCopy = new List<string>();
         private int gridSize;
-        private string[] AllWords;
+        private List<string> AllWords;
+        private Dictionary<string, float> frequencyDico;
 
         List<CrossWord> fitOnGridList { get; set; }
 
@@ -70,8 +78,34 @@ namespace WiktionaireParser.ui
             cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
             cbsGridSize.SelectedIndex = 2;
 
-            AllWords = File.ReadAllLines(MainWindow.DicoName);
+            AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm();
             lbxDicoCrossWord.ItemsSource = AllWords;
+            cbxBranchLimit.ItemsSource = Enumerable.Range(0, 10);
+            cbxBranchLimit.SelectedIndex = 0;
+
+            cbxDepthLimit.ItemsSource = Enumerable.Range(1, 5);
+            cbxDepthLimit.SelectedIndex = 0;
+
+            frequencyDico = LoadFrequencyDico(frequencyDicoFileName);
+        }
+
+        Dictionary<string, float> LoadFrequencyDico(string frequencyDicoFileName)
+        {
+            var lines = File.ReadAllLines(frequencyDicoFileName);
+
+            var valids = new Dictionary<string, float>();
+
+            foreach (var line in lines)
+            {
+                var tokens = line.Split();
+                var mot = tokens.First();
+                var freq = Convert.ToDouble(tokens.Last());
+
+                valids[mot] = (float)freq;
+
+            }
+
+            return valids;
         }
         public UICell GetUICell(Coord coord)
         {
@@ -103,7 +137,12 @@ namespace WiktionaireParser.ui
             if (gen != null)
             {
                 DrawGrid(gen);
-                lbxFitWord.ItemsSource = gen.FitWordList;
+                foreach (var crossWord in gen.FitWordList)
+                {
+                    var zipf = frequencyDico[crossWord.Word];
+                    crossWord.Freq = zipf;
+                }
+                lbxFitWord.ItemsSource = gen.FitWordList.OrderByDescending(w=>w.Freq);
             }
         }
 
@@ -111,21 +150,21 @@ namespace WiktionaireParser.ui
 
         private void cmdGenGameLevel_Click(object sender, RoutedEventArgs e)
         {
-            SelectLevel();
+            //SelectLevelSequential();
+            SelectLevelParallel();
         }
-        void SelectLevel()
+
+
+        void SelectLevelSequential()
+
         {
-            ParallelOptions options = new ParallelOptions()
-            {
-                MaxDegreeOfParallelism = 12
-            };
             gridSize = 7;
+            int minLen = 6;
             DawgService = MainWindow.DawgService;
-            ConcurrentBag<GenGrid> genGrids = new ConcurrentBag<GenGrid>();
-            ConcurrentDictionary<string, List<string>> selectedWord = new ConcurrentDictionary<string, List<string>>();
+            List<GenGrid> genGrids = new List<GenGrid>();
+            Dictionary<string, List<string>> selectedWord = new Dictionary<string, List<string>>();
 
-
-            Parallel.ForEach(AllWords.Where(w => w.Length >= 4), options, allWord =>
+            foreach (var allWord in AllWords.Where(w => w.Length >= minLen && w.Length <= 7))
             {
                 var word = allWord.ToLowerInvariant().RemoveDiacritics();
                 var allPossibleWord = DawgService.FindAllPossibleWord(word);
@@ -138,55 +177,24 @@ namespace WiktionaireParser.ui
                 var list1 = set.OrderByDescending(d => d.Length).ToList();
                 if (list1.Count >= 4)
                 {
-                    selectedWord.TryAdd(word, list1);
+                    selectedWord.Add(word, list1);
                 }
-            });
+            }
+
+            var wordsToTake = 500;
 
 
-            //foreach (var allWord in AllWords.Where(w => w.Length >= 4))
-            //{
-            //    var word = allWord.ToLowerInvariant().RemoveDiacritics();
-            //    var allPossibleWord = DawgService.FindAllPossibleWord(word);
-            //    var set = new HashSet<string>();
-            //    foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p => p.Key > 2))
-            //    {
-            //        set.UnionWith(pair.Value);
-            //    }
 
-            //    var list1 = set.OrderByDescending(d => d.Length).ToList();
-            //    if (list1.Count >= 4)
-            //    {
-            //        selectedWord.Add(word, list1);
-            //    }
-            //}
+            foreach (var allWord in selectedWord.Take(wordsToTake))
+            {
+                var word = allWord.Key;
+                var list1 = allWord.Value;
+                var result = GenGrid.GenAll(word, list1, gridSize, BranchLimit,DepthLimit,frequencyDico);
+                var grid = result.OrderByDescending(g => g.FitWordList.Count)
+                    .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
 
-            var wordsToTake = 2000;
-
-
-            Parallel.ForEach(selectedWord.Take(wordsToTake), options, allWord =>
-             {
-                 var word = allWord.Key;
-                 var list1 = allWord.Value;
-                 var result = GenAll(word, list1, gridSize);
-                 if (result?.Count > 0)
-                 {
-                     var grid = result.OrderByDescending(g => g.FitWordList.Count)
-                         .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
-
-                     genGrids.Add(grid);
-                 }
-             });
-
-            //foreach (var allWord in selectedWord.Take(wordsToTake))
-            //{
-            //    var word = allWord.Key;
-            //    var list1 = allWord.Value;
-            //    var result = GenAll(word, list1, gridSize);
-            //    var grid = result.OrderByDescending(g => g.FitWordList.Count)
-            //        .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
-
-            //    genGrids.Add(grid);
-            //}
+                genGrids.Add(grid);
+            }
 
             lbxGeneators.ItemsSource = genGrids;
             CrossWordGame crossWordGame = new CrossWordGame(Lang.Fr, genGrids.ToList());
@@ -200,8 +208,87 @@ namespace WiktionaireParser.ui
             MessageBox.Show($"{genGrids.Count} level generated - {selectedWord.Count} words treated ");
 
         }
+
+        void SelectLevelParallel()
+        {
+            var start = DateTime.UtcNow;
+            ParallelOptions options = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 12
+            };
+            gridSize = 7;
+            int minLen = 4;
+            int maxLen = 4;
+            DawgService = MainWindow.DawgService;
+
+            ConcurrentBag<GenGrid> genGrids = new ConcurrentBag<GenGrid>();
+            ConcurrentDictionary<string, List<string>> selectedWord = new ConcurrentDictionary<string, List<string>>();
+
+
+            var source = AllWords.Where(w => w.Length >= minLen && w.Length <= maxLen).ToList();
+            Parallel.ForEach(source, options, allWord =>
+              {
+                  var word = allWord.ToLowerInvariant().RemoveDiacritics();
+                  var allPossibleWord = DawgService.FindAllPossibleWord(word);
+                  var set = new HashSet<string>();
+                  foreach (KeyValuePair<int, List<string>> pair in allPossibleWord.Where(p => p.Key > 2))
+                  {
+                      set.UnionWith(pair.Value);
+                  }
+
+                  var list1 = set.OrderByDescending(d => d.Length).ToList().RemovePluralForm();
+                  if (list1.Count >= 4)
+                  {
+                      selectedWord.TryAdd(word, list1);
+                  }
+              });
+
+            var wordsToTake = 100;
+
+            Parallel.ForEach(selectedWord.Take(wordsToTake), options, allWord =>
+             {
+                 var word = allWord.Key;
+                 var list1 = allWord.Value;
+
+                 if (word.Length >= 7)
+                 {
+                     gridSize = 9;
+                 }
+                 else
+                 {
+                     gridSize = 7;
+                 }
+
+                 var result = GenGrid.GenAll(word, list1, gridSize, BranchLimit,DepthLimit,frequencyDico);
+                 if (result?.Count > 0)
+                 {
+                     var grid = result.OrderByDescending(g => g.FitWordList.Count)
+                         .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
+
+                     genGrids.Add(grid);
+                 }
+             });
+
+
+            var final = genGrids.OrderByDescending(g => g.Difficulty).ToList();
+            lbxGeneators.ItemsSource = final;
+            CrossWordGame crossWordGame = new CrossWordGame(Lang.Fr, final);
+            var json = JsonConvert.SerializeObject(crossWordGame);
+
+            string folder = @"D:\__programs_datas\";
+            var gameDataPath = $"{folder}wordbox_{crossWordGame.Language}.json";
+            File.WriteAllText(gameDataPath, json);
+            Console.WriteLine(crossWordGame.Language);
+
+            var end = DateTime.UtcNow;
+            var duration = end.Subtract(start);
+
+            MessageBox.Show($"{final.Count} level generated - {selectedWord.Count} words treated \r\n duree {duration.TotalMinutes}");
+
+        }
         private void cmdGenMany_Click(object sender, RoutedEventArgs e)
         {
+            start=DateTime.UtcNow;
             gridSize = (int)cbsGridSize.SelectedValue;
             DawgService = MainWindow.DawgService;
             var text = txtWordForGrid.Text.ToLowerInvariant().RemoveDiacritics();
@@ -218,51 +305,50 @@ namespace WiktionaireParser.ui
             }
 
             var list1 = set.OrderByDescending(d => d.Length).ToList();
-
+            list1 = list1.RemovePluralForm();
             var temp = string.Join(" ", list1);
             tblAllWord.Text = temp;
 
             //GenerateManyGrid(list1, gridSize);
-            var result = GenAll(text, list1, gridSize);
+            var result = GenGrid.GenAll(text, list1, gridSize, BranchLimit,DepthLimit,frequencyDico);
             lbxGeneators.ItemsSource = result
                 .OrderByDescending(g => g.FitWordList.Count)
                 .ThenBy(g => g.Grid.BaryDistance);
 
-            tblResultCount.Text = $"gen many {result.Count}";
+            end=DateTime.UtcNow;
+            var diff = end.Subtract(start);
+            tblResultCount.Text = $"gen many {result.Count} \r\ntime {diff.TotalSeconds} sec branch {BranchLimit} depth {DepthLimit}";
 
         }
 
 
-        List<GenGrid> GenAll(string letters, List<string> listOfWords, int size)
-        {
-            int take = 10000;
-            var result = new List<GenGrid>();
-            listOfWords = listOfWords.OrderByDescending(d => d.Length).ToList();
-            var testGrid = new CrossWordGrid(NumRow, NumCol);
-            var word = listOfWords.First().ToLowerInvariant();
-            //listOfWords.Remove(word);
-            var startingPositions = testGrid.GetStartingCoordFor(word);
+        //ConcurrentBag<GenGrid> GenAll(string letters, List<string> listOfWords, int size)
+        //{
+        //    int take = 10000;
+        //    var result = new ConcurrentBag<GenGrid>();
+        //    listOfWords = listOfWords.OrderByDescending(d => d.Length).ToList();
+        //    var testGrid = new CrossWordGrid(size, size);
+        //    var word = listOfWords.First().ToLowerInvariant();
+        //    //listOfWords.Remove(word);
+        //    var startingPositions = testGrid.GetStartingCoordFor(word);
 
-            //foreach (var startingPosition in startingPositions.Take(take))
-            //{
-            //    //testGrid = new CrossWordGrid(NumRow, NumCol);
-            //    var generator = new GenGrid(NumRow, NumCol, listOfWords, startingPosition, result);
+        //    //foreach (var startingPosition in startingPositions)
+        //    //{
+        //    //    var generator = new GenGrid(size, size, letters, new List<string>(listOfWords), startingPosition, result,BranchLimit);
+        //    //}
 
-            //    //result.Add(generator);
-            //}
-
-            ParallelOptions options = new ParallelOptions()
-            {
-                MaxDegreeOfParallelism = 6
-            };
-            Parallel.ForEach(startingPositions, options, startingPosition =>
-            {
-                var generator = new GenGrid(size, size, letters, new List<string>(listOfWords), startingPosition, result);
-            });
+        //    ParallelOptions options = new ParallelOptions()
+        //    {
+        //        MaxDegreeOfParallelism = 6
+        //    };
+        //    Parallel.ForEach(startingPositions, options, startingPosition =>
+        //    {
+        //        var generator = new GenGrid(size, size, letters, new List<string>(listOfWords), startingPosition, result, BranchLimit);
+        //    });
 
 
-            return result;
-        }
+        //    return result;
+        //}
 
         void GenerateManyGrid(List<string> aList, int size)
         {
@@ -511,5 +597,14 @@ namespace WiktionaireParser.ui
             }
         }
 
+        private void cbxBranchLimit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            BranchLimit = cbxBranchLimit.SelectedIndex;
+        }
+
+        private void cbxDepthLimit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DepthLimit = (int) cbxDepthLimit.SelectedValue;
+        }
     }
 }

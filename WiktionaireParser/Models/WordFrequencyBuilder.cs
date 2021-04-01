@@ -1,36 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media.Animation;
 using CommonLibTools;
 using CommonLibTools.Libs;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace WiktionaireParser.Models
 {
-    public class WordFrequency
-    {
-        public WordFrequency(string word, long count, long totalCount)
-        {
-            Key = word;
-            Count = count;
-            AllWordCount = totalCount;
-            if (totalCount == 0)
-            {
-                Frequency = 0;
-            }
-            else
-            {
-                Frequency = Count / (float)AllWordCount;
-            }
-
-        }
-
-        [BsonId]
-        public string Key { get; set; }
-        public long Count { get; set; }
-        public long AllWordCount { get; set; }
-        public float Frequency { get; set; }
-    }
     public class WordFrequencyBuilder
     {
         public Dictionary<string, long> WordDico { get; set; }
@@ -96,6 +72,17 @@ namespace WiktionaireParser.Models
             {
                 return null;
             }
+        }
+
+        public List<WordFrequency> GetFrequencyLists()
+        {
+            var result=new List<WordFrequency>();
+            foreach (var pair in WordDico)
+            {
+                result.Add(new WordFrequency(pair.Key,pair.Value,0));
+            }
+
+            return result.OrderByDescending(f=>f.Count).ToList();
         }
 
         public void CheckAllWord(Dictionary<string, bool> correctWordDico)

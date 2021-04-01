@@ -19,8 +19,11 @@ namespace CommonLibTools.Libs.CrossWord
 
         public int CenterPoint { get; set; }
 
+
+
         // for barycenter
         public double BaryDistance { get; set; }
+
         public float BaryCol { get; set; }
         public float BaryRow { get; set; }
 
@@ -51,33 +54,6 @@ namespace CommonLibTools.Libs.CrossWord
 
         }
 
-
-        public CrossWordGrid Copy()
-        {
-            var newGrid=new CrossWordGrid(NumRow,NumCol);
-            newGrid.NumCol = NumCol;
-            newGrid.NumRow = NumRow;
-
-            for (int col = 0; col < NumCol; col++)
-            {
-                for (int row = 0; row < NumRow; row++)
-                {
-                    var newCell = newGrid.GetCell(row, col);
-                    var cell = GetCell(row, col);
-                    newCell.CopyFrom(cell);
-                }
-            }
-
-            //copy anchor list 
-            foreach (var crossWordCell in AnchorCellsList)
-            {
-                var cell = GetCell(crossWordCell.Coord.Row, crossWordCell.Coord.Col);
-                newGrid.AnchorCellsList.Add(cell);
-            }
-
-            return newGrid;
-        }
-
         public void GetGridBarycenter()
         {
             var sumWeight = 0;
@@ -105,8 +81,6 @@ namespace CommonLibTools.Libs.CrossWord
             BaryDistance = Math.Sqrt(BaryRow * BaryRow + BaryCol * BaryCol);
 
         }
-
-
 
         public void ComputeGridDensity()
         {
@@ -306,6 +280,7 @@ namespace CommonLibTools.Libs.CrossWord
             {
                 IsEmpty = false;
             }
+
             foreach (var letter in word.WordLetterList)
             {
                 var cellCoord = letter.Coord;
@@ -320,6 +295,12 @@ namespace CommonLibTools.Libs.CrossWord
 
 
                     AnchorCellsList.Add(cell);
+                }
+                else
+                {
+                    Console.WriteLine($"invalid coord {word},{letter}");
+
+                    throw new Exception($"invalid coord {word},{letter}");
                 }
             }
 
@@ -501,7 +482,15 @@ namespace CommonLibTools.Libs.CrossWord
                 try
                 {
                     var mazeCell = MazeCellList[x, y];
-                    return mazeCell.ExcludedFromMaze == false;
+                    if (mazeCell.ExcludedFromMaze)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                    //return mazeCell.ExcludedFromMaze == false;
                 }
                 catch (System.Exception exception)
                 {

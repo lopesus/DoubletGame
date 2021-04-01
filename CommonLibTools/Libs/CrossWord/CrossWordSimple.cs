@@ -1,14 +1,27 @@
-﻿namespace CommonLibTools.Libs.CrossWord
+﻿using Newtonsoft.Json;
+
+namespace CommonLibTools.Libs.CrossWord
 {
     public class CrossWordSimple
     {
-        public CoordSimple C;
-        public CrossWordDirection D { get; set; }
-        public string W { get; set; }
+        [JsonProperty(PropertyName = "C")]
+        public CoordSimple Coord;
 
+        [JsonProperty(PropertyName = "D")]
+
+        public CrossWordDirection Direction { get; set; }
+
+        [JsonProperty(PropertyName = "W")]
+
+        public string Word { get; set; }
+
+        public CrossWordSimple()
+        {
+            
+        }
         public override string ToString()
         {
-            return $"{C.R};{C.C};{D};{W}";
+            return $"{Coord.R};{Coord.C};{Direction};{Word}";
         }
     }
 }

@@ -5,11 +5,16 @@ namespace CommonLibTools.Libs.CrossWord
     public class CrossWordGame
     {
         public Lang Language { get; set; }
-        public string LangString{ get; set; }
+        public string LangString { get; set; }
 
         public int ChapterCount { get; set; }
+        public int LevelCount { get; set; }
         public List<CrossWordChapter> Chapters { get; set; }
 
+        public CrossWordGame()
+        {
+            
+        }
         public CrossWordGame(Lang lang, List<GenGrid> grids)
         {
             Language = lang;
@@ -42,6 +47,7 @@ namespace CommonLibTools.Libs.CrossWord
             }
 
             ChapterCount = Chapters.Count;
+            LevelCount = grids.Count;
         }
 
         private int GetlevelPerChapter(int chapterCount)

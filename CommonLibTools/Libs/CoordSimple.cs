@@ -10,6 +10,10 @@ namespace CommonLibTools.Libs
         public int R;
         public int C;
 
+        public CoordSimple()
+        {
+            
+        }
         public CoordSimple(int r, int c)
         {
             R = r;

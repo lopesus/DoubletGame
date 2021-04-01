@@ -35,9 +35,10 @@ namespace WiktionaireParser
         private string folder = @"G:\zzzWiktionnaire\";
         public List<WikiPage> PagesList = new List<WikiPage>();
         private MongoClient client;
-        private IMongoDatabase database;
-        private IMongoCollection<WikiPage> wikiCollection;
-        private IMongoCollection<Anagram> anagramCollection;
+        public static IMongoDatabase Database;
+        public static IMongoCollection<WikiPage> WikiCollection;
+        public static IMongoCollection<Anagram> AnagramCollection;
+        public static IMongoCollection<WordFrequency> WordFrequencyCollection;
         private string wikiCollectionName;
 
         int pageToLoadFromDb = Int32.MaxValue;
@@ -64,10 +65,11 @@ namespace WiktionaireParser
             // To directly connect to a single MongoDB server
             // (this will not auto-discover the primary even if it's a member of a replica set)
             client = new MongoClient();
-            database = client.GetDatabase("wiki");
+            Database = client.GetDatabase("wiki");
             wikiCollectionName = "fr";
-            wikiCollection = database.GetCollection<WikiPage>(wikiCollectionName);
-            anagramCollection = database.GetCollection<Anagram>("anagram");
+            WikiCollection = Database.GetCollection<WikiPage>(wikiCollectionName);
+            AnagramCollection = Database.GetCollection<Anagram>("anagram");
+            WordFrequencyCollection = Database.GetCollection<WordFrequency>("WordFrequency");
 
             SetDbIndex();
 
@@ -90,12 +92,12 @@ namespace WiktionaireParser
 
         private void LoadPagesFromDb()
         {
-            PagesList = wikiCollection.Find(FilterDefinition<WikiPage>.Empty).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
+            PagesList = WikiCollection.Find(FilterDefinition<WikiPage>.Empty).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
                 .Sort(Builders<WikiPage>.Sort.Ascending(p => p.Title))
                 .ToList();
 
             lbxPages.ItemsSource = PagesList;
-            var anagrams = anagramCollection.Find(FilterDefinition<Anagram>.Empty).ToList();
+            var anagrams = AnagramCollection.Find(FilterDefinition<Anagram>.Empty).ToList();
             anagramBuilder = new AnagramBuilder(anagrams);
 
             // LoadTrie();
@@ -138,7 +140,7 @@ namespace WiktionaireParser
 
             var sortByTitle = Builders<WikiPage>.Sort.Ascending(p => p.Title);
             var sortByFrequencyDef = Builders<WikiPage>.Sort.Descending(p => p.Frequency);
-            var findFluent = wikiCollection.Find(antonymFilter & sinonymFilter & verbFilter & lengthFilter & anagramFilter)
+            var findFluent = WikiCollection.Find(antonymFilter & sinonymFilter & verbFilter & lengthFilter & anagramFilter)
                 .Skip(pageToSkipFromDb).Limit(pageToLoadFromDb);
             if (sortByFrequency)
             {
@@ -158,8 +160,8 @@ namespace WiktionaireParser
         }
         public void ParseWikiDump()
         {
-            database.DropCollection(wikiCollectionName);
-            wikiCollection = database.GetCollection<WikiPage>(wikiCollectionName);
+            Database.DropCollection(wikiCollectionName);
+            WikiCollection = Database.GetCollection<WikiPage>(wikiCollectionName);
 
             anagramBuilder = new AnagramBuilder();
             SplitDicoToPage();
@@ -191,7 +193,7 @@ namespace WiktionaireParser
 
             CreateIndexModel<WikiPage> indexModel = new CreateIndexModel<WikiPage>(indexDefinition);
 
-            await wikiCollection.Indexes.CreateOneAsync(indexModel);
+            await WikiCollection.Indexes.CreateOneAsync(indexModel);
 
             var indexDefinitionAnagram = Builders<Anagram>.IndexKeys.Combine(
                            Builders<Anagram>.IndexKeys.Ascending(f => f.Key),
@@ -207,15 +209,14 @@ namespace WiktionaireParser
 
         public void SplitDicoToPage()
         {
-            int count = 0;
+            int pageCount = 0;
             //count = int.MaxValue;
             var builder = new StringBuilder();
             using (StreamReader sr = File.OpenText(fileName))
             {
                 string line = String.Empty;
-                while ((line = sr.ReadLine()) != null && count <= pageToParseCount)
+                while ((line = sr.ReadLine()) != null && pageCount <= pageToParseCount)
                 {
-                    count++;
                     if (line.Trim().StartsWith("<page>"))
                     {
                         builder.Clear();
@@ -229,6 +230,8 @@ namespace WiktionaireParser
                         } while (line != null && line.Trim().StartsWith("</page>") == false);
 
                         var page = builder.ToString();
+                          pageCount++;
+
                         //Console.WriteLine(page);
 
                         XmlDocument document = new XmlDocument();
@@ -318,8 +321,8 @@ namespace WiktionaireParser
 
                 wikiPage.MostFrequentWordCount = frequencyBuilder.MostFrequentWordCount;
             }
-            await wikiCollection.InsertManyAsync(list);
-            await anagramCollection.InsertManyAsync(anagramBuilder.GetAnagramsList());
+            await WikiCollection.InsertManyAsync(list);
+            await AnagramCollection.InsertManyAsync(anagramBuilder.GetAnagramsList());
 
             File.WriteAllText(@"D:\__programs_datas\wiki_valid_word.txt", builder.ToString());
         }
@@ -355,7 +358,7 @@ namespace WiktionaireParser
                 mot = mot.RemoveDiacritics();
                 try
                 {
-                    var page = await wikiCollection.Find(x => x.TitleInv == mot).FirstAsync();//.Limit(1).ToListAsync();
+                    var page = await WikiCollection.Find(x => x.TitleInv == mot).FirstAsync();//.Limit(1).ToListAsync();
                     tblWordInfos.Text = $"freq:{page.Frequency} {page.FrequencyCount} on {page.FrequencyTotalCount} max is {page.MostFrequentWordCount}";
                     txtAllPageText.Text = page.Text;
                     txtPageLangText.Text = page.LangText;
@@ -384,7 +387,7 @@ namespace WiktionaireParser
             try
             {
                 //var page = anagramBuilder.GetAnagramFor(key);
-                var page = await anagramCollection.Find(x => x.Key == key).FirstAsync();//.Limit(1).ToListAsync();
+                var page = await AnagramCollection.Find(x => x.Key == key).FirstAsync();//.Limit(1).ToListAsync();
                 var all = string.Join("\r\n", page.AnagramList);
                 txtAnagrams.Text = all;
 
@@ -425,7 +428,7 @@ namespace WiktionaireParser
             var newName = $"{dirPath}\\{name}_no_verbs_4_to_7.txt";
             // Fix(fileName);return;
 
-            var enumerable = wikiCollection.Find(FilterDefinition<WikiPage>.Empty)
+            var enumerable = WikiCollection.Find(FilterDefinition<WikiPage>.Empty)
                 .ToList().Select(m => m.TitleInv);
             var set = new HashSet<string>(enumerable);
             var valids = set.ToDictionary(p => p, p => p.Length);
@@ -455,8 +458,9 @@ namespace WiktionaireParser
                         final.AppendLine(mot);
                     }
                 }
-
             }
+
+
             File.WriteAllText(newName, final.ToString());
             MessageBox.Show("done");
         }

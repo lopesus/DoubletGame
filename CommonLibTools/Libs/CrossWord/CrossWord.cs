@@ -15,6 +15,7 @@ namespace CommonLibTools.Libs.CrossWord
         public CrossWordCell BeforeStartCell;
         public CrossWordCell AfterEndCell;
 
+        public float Freq { get; set; }
 
 
         public CrossWord(string word, Coord coord, CrossWordDirection direction)
@@ -77,7 +78,7 @@ namespace CommonLibTools.Libs.CrossWord
 
         public override string ToString()
         {
-            return $"{Word} - {Coord} - {Direction}";
+            return $"{Word} - {Coord} - {Direction} - freq: {Freq}";
         }
     }
 }

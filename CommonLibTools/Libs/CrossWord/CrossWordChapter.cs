@@ -9,6 +9,10 @@ namespace CommonLibTools.Libs.CrossWord
         public int  Id { get; set; }
         public List<CrossWordLevel> AllLevel { get; set; }
 
+        public CrossWordChapter()
+        {
+            
+        }
         public CrossWordChapter(int id)
         {
             Id = id;

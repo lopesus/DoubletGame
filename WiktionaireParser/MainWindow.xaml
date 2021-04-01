@@ -12,8 +12,8 @@
             <TabItem Header="TabItem">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="203"/>
-                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
@@ -134,6 +134,11 @@
                         <RowDefinition Height="353*"/>
                     </Grid.RowDefinitions>
                     <Button x:Name="cmdParseDump" Content="Parse Dump" HorizontalAlignment="Left" Height="33" Margin="30,0,0,0" VerticalAlignment="Center" Width="72" Click="cmdParseDump_Click"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="FREQUENCY PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
+                <Grid Background="#FFE5E5E5">
+                    <ui:WordFrequencyParser/>
                 </Grid>
             </TabItem>
         </TabControl>

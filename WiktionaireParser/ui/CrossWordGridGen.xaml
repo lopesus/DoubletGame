@@ -14,13 +14,13 @@
             <ColumnDefinition Width="50"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="63"/>
+            <RowDefinition Height="100"/>
             <RowDefinition Height="55"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="2" Grid.Row="2" Background="#FF839367">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="300"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <ListBox x:Name="lbxFitWord" SelectionChanged="lbxFitWord_SelectionChanged"/>
@@ -35,8 +35,10 @@
             <Button x:Name="cmdGenMany" Content="gen many" Canvas.Left="302" Canvas.Top="2" Width="75" Height="30" Click="cmdGenMany_Click"/>
             <TextBox x:Name="txtWordForGrid" Height="20" Canvas.Left="394" Canvas.Top="10" Text="cube" TextWrapping="Wrap" Width="67"/>
             <ComboBox x:Name="cbsGridSize" Height="20" Canvas.Left="476" Canvas.Top="10" Width="64" SelectionChanged="cbsGridSize_SelectionChanged"/>
-            <TextBlock x:Name="tblResultCount" Height="28" Canvas.Left="10" Canvas.Top="35" Text="TextBlock" TextWrapping="Wrap" Width="207"/>
-            <Button x:Name="cmdGenGameLevel" Content="gen levels" Height="22" Canvas.Left="569" Canvas.Top="10" Width="86" Click="cmdGenGameLevel_Click"/>
+            <TextBlock x:Name="tblResultCount" Height="55" Canvas.Left="10" Canvas.Top="35" Text="TextBlock" TextWrapping="Wrap" Width="207"/>
+            <Button x:Name="cmdGenGameLevel" Content="gen levels" Height="22" Canvas.Left="476" Canvas.Top="35" Width="86" Click="cmdGenGameLevel_Click"/>
+            <ComboBox x:Name="cbxBranchLimit" Height="20" Canvas.Left="562" Canvas.Top="10" Width="71" SelectionChanged="cbxBranchLimit_SelectionChanged"/>
+            <ComboBox x:Name="cbxDepthLimit" Height="25" Canvas.Left="667" Canvas.Top="28" Width="64" SelectionChanged="cbxDepthLimit_SelectionChanged"/>
         </Canvas>
         <ListBox x:Name="lbxGeneators" Grid.Row="2" SelectionChanged="lbxGeneators_SelectionChanged" Grid.Column="1"/>
         <Grid Grid.ColumnSpan="4" Grid.Row="1" Background="#FFB06868" Margin="0,0,0,0">

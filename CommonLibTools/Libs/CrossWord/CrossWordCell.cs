@@ -12,7 +12,9 @@ namespace CommonLibTools.Libs.CrossWord
         /// </summary>
         public Coord OrthoCoord;
         public string Letter { get; set; }
+        public string HintLetter { get; set; }
         public bool IsEmpty { get; set; }
+        public bool IsRevealed { get; set; }
         public CrossWordDirection Direction { get; set; }
 
         public int SpaceBefore { get; set; }

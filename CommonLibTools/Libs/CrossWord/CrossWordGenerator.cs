@@ -21,7 +21,8 @@ namespace CommonLibTools.Libs.CrossWord
 
         public float FitScore { get; set; }
 
-       
+        public float Difficulty { get; set; }
+
         public CrossWordGenerator()
         {
             
@@ -43,8 +44,7 @@ namespace CommonLibTools.Libs.CrossWord
 
             Grid.GetGridBarycenter();
 
-        }
-
+        }  
 
         void GenCrosswordSimple()
         {
@@ -104,8 +104,6 @@ namespace CommonLibTools.Libs.CrossWord
             builder.AppendLine($"Bary {Grid.BaryDistance}");
             builder.AppendLine($"BaryRow {Grid.BaryRow} ");
             builder.AppendLine($"BaryCol {Grid.BaryCol} ");
-
-
 
             builder.AppendLine($"");
             return builder.ToString();

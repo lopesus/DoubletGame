@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CommonLibTools.Libs.Extensions
 {
@@ -10,6 +11,34 @@ namespace CommonLibTools.Libs.Extensions
         static ListExtensions()
         {
             Random = new Random();
+        }
+
+        public static List<string> RemovePluralForm(this List<string> list)
+        {
+            Dictionary<string,bool> singular = new Dictionary<string, bool>();
+            var final=new List<string>();
+
+            foreach (var mot in list.OrderBy(w=>w.Length))
+            {
+                //check french plural form
+                var lowerInvariant = mot.ToLowerInvariant();
+                if (lowerInvariant.EndsWith("s"))
+                {
+                    var singularForm = lowerInvariant.TrimEnd("s");
+                    if (singular.ContainsKey(singularForm) == false)
+                    {
+                        final.Add(mot);
+
+                    }
+                }
+                else
+                {
+                    singular[lowerInvariant] = true;
+                    final.Add(mot);
+                }
+            }
+
+            return final;
         }
         public static void Shuffle<T>(this IList<T> list)
         {
