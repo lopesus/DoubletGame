@@ -78,7 +78,7 @@ namespace WiktionaireParser.ui
             cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
             cbsGridSize.SelectedIndex = 2;
 
-            AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm();
+            AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm().Distinct().ToList();
             lbxDicoCrossWord.ItemsSource = AllWords;
             cbxBranchLimit.ItemsSource = Enumerable.Range(0, 10);
             cbxBranchLimit.SelectedIndex = 0;
@@ -218,7 +218,7 @@ namespace WiktionaireParser.ui
             };
             gridSize = 7;
             int minLen = 4;
-            int maxLen = 4;
+            int maxLen = 7;
             DawgService = MainWindow.DawgService;
 
             ConcurrentBag<GenGrid> genGrids = new ConcurrentBag<GenGrid>();
@@ -243,7 +243,9 @@ namespace WiktionaireParser.ui
                   }
               });
 
-            var wordsToTake = 100;
+            var wordsToTake = 1000;
+
+            //var finalwords = selectedWord.Distinct().ToList();
 
             Parallel.ForEach(selectedWord.Take(wordsToTake), options, allWord =>
              {
@@ -271,6 +273,16 @@ namespace WiktionaireParser.ui
 
 
             var final = genGrids.OrderByDescending(g => g.Difficulty).ToList();
+            var allUnique = final.GroupBy(x => x.Letters).All(g => g.Count() == 1);
+            if (allUnique==false)
+            {
+                var duplicate = final.GroupBy(x => x.Letters)
+                    .Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+
+                var @join = string.Join(" ", duplicate);
+                MessageBox.Show($" NOT ALL UNIQUE \r\n {@join}");
+               
+            }
             lbxGeneators.ItemsSource = final;
             CrossWordGame crossWordGame = new CrossWordGame(Lang.Fr, final);
             var json = JsonConvert.SerializeObject(crossWordGame);

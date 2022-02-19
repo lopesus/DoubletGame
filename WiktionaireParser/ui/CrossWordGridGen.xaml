@@ -37,8 +37,10 @@
             <ComboBox x:Name="cbsGridSize" Height="20" Canvas.Left="476" Canvas.Top="10" Width="64" SelectionChanged="cbsGridSize_SelectionChanged"/>
             <TextBlock x:Name="tblResultCount" Height="55" Canvas.Left="10" Canvas.Top="35" Text="TextBlock" TextWrapping="Wrap" Width="207"/>
             <Button x:Name="cmdGenGameLevel" Content="gen levels" Height="22" Canvas.Left="476" Canvas.Top="35" Width="86" Click="cmdGenGameLevel_Click"/>
-            <ComboBox x:Name="cbxBranchLimit" Height="20" Canvas.Left="562" Canvas.Top="10" Width="71" SelectionChanged="cbxBranchLimit_SelectionChanged"/>
-            <ComboBox x:Name="cbxDepthLimit" Height="25" Canvas.Left="667" Canvas.Top="28" Width="64" SelectionChanged="cbxDepthLimit_SelectionChanged"/>
+            <ComboBox x:Name="cbxBranchLimit" Height="20" Canvas.Left="577" Canvas.Top="36" Width="71" SelectionChanged="cbxBranchLimit_SelectionChanged"/>
+            <ComboBox x:Name="cbxDepthLimit" Height="20" Canvas.Left="667" Canvas.Top="36" Width="64" SelectionChanged="cbxDepthLimit_SelectionChanged"/>
+            <TextBlock x:Name="branch_limit" Height="21" Canvas.Left="575" Canvas.Top="9" Text="branch " TextWrapping="Wrap" Width="73"/>
+            <TextBlock x:Name="depht" Height="23" Canvas.Left="667" Canvas.Top="9" Text="depht" TextWrapping="Wrap" Width="64"/>
         </Canvas>
         <ListBox x:Name="lbxGeneators" Grid.Row="2" SelectionChanged="lbxGeneators_SelectionChanged" Grid.Column="1"/>
         <Grid Grid.ColumnSpan="4" Grid.Row="1" Background="#FFB06868" Margin="0,0,0,0">
