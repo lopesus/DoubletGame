@@ -31,22 +31,23 @@ namespace WiktionaireParser
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string fileName = @"G:\zzzWiktionnaire\frwiktionary-latest-pages-articles.xml";
-        private string folder = @"G:\zzzWiktionnaire\";
+        public static string WiktioFileName = @"D:\zzzWiktionnaire\frwiktionary-latest-pages-articles.xml";
+        public static string WiktioParserResultFolder = @"";
+        private string folder = @"D:\zzzWiktionnaire\";
         public List<WikiPage> PagesList = new List<WikiPage>();
         private MongoClient client;
         public static IMongoDatabase Database;
         public static IMongoCollection<WikiPage> WikiCollection;
         public static IMongoCollection<Anagram> AnagramCollection;
         public static IMongoCollection<WordFrequency> WordFrequencyCollection;
-        private string wikiCollectionName;
+        public static string wikiCollectionName;
 
         int pageToLoadFromDb = Int32.MaxValue;
         int pageToSkipFromDb = 0;
-        private int pageToParseCount = Int32.MaxValue;
+        private int pageToParseCount = 100;// Int32.MaxValue;
 
-        private AnagramBuilder anagramBuilder;
-        WordFrequencyBuilder frequencyBuilder = new WordFrequencyBuilder();
+        public static AnagramBuilder anagramBuilder;
+        public static WordFrequencyBuilder frequencyBuilder = new WordFrequencyBuilder();
 
         Dictionary<string, bool> correctWikiPageWords = new Dictionary<string, bool>();
 
@@ -59,7 +60,9 @@ namespace WiktionaireParser
 
         public MainWindow()
         {
-
+            var resultFolder = Path.GetFileNameWithoutExtension(WiktioFileName).Split('-').FirstOrDefault();
+            WiktioParserResultFolder = Path.Combine(Path.GetDirectoryName(WiktioFileName),$"{resultFolder}_Parse");
+            Directory.CreateDirectory(WiktioParserResultFolder);
             //constructTrie.GenerateTrieFromFile(@"C:\Users\mboum\Desktop\web\verbes\ods8_final.txt");
 
             // To directly connect to a single MongoDB server
@@ -87,7 +90,8 @@ namespace WiktionaireParser
             cbxAnagramCount.SelectedIndex = 0;
 
             // LoadPagesFromDb();
-            LoadTrie();
+
+            //LoadTrie();
         }
 
         private void LoadPagesFromDb()
@@ -212,7 +216,8 @@ namespace WiktionaireParser
             int pageCount = 0;
             //count = int.MaxValue;
             var builder = new StringBuilder();
-            using (StreamReader sr = File.OpenText(fileName))
+            SectionBuilder sectionBuilder= new SectionBuilder();
+            using (StreamReader sr = File.OpenText(WiktioFileName))
             {
                 string line = String.Empty;
                 while ((line = sr.ReadLine()) != null && pageCount <= pageToParseCount)
@@ -250,25 +255,26 @@ namespace WiktionaireParser
                                 Console.WriteLine();
                             }
                             var firstChar = title[0];
-                            if (char.IsLetter(firstChar)
-                                && char.IsUpper(firstChar) == false
-                                && title.Contains("-") == false && title.Contains(" ") == false
-                                && title.Contains("’") == false && title.Contains("'") == false
-                                && title.Contains(".") == false && title.Contains("/") == false
-                                && title.Contains("(") == false && title.Contains(")") == false
-                                && title.Contains("[") == false && title.Contains("]") == false
-                                && title.Contains(",") == false && title.Contains("*") == false
+                            if ( title.ContainsOnlyLettersAToZ()
+                                //char.IsLetter(firstChar)
+                                //&& char.IsUpper(firstChar) == false
+                                //&& title.Contains("-") == false && title.Contains(" ") == false
+                                //&& title.Contains("’") == false && title.Contains("'") == false
+                                //&& title.Contains(".") == false && title.Contains("/") == false
+                                //&& title.Contains("(") == false && title.Contains(")") == false
+                                //&& title.Contains("[") == false && title.Contains("]") == false
+                                //&& title.Contains(",") == false && title.Contains("*") == false
                                 )
                             {
                                 nodeList = document.GetElementsByTagName("text");
                                 text = nodeList[0].InnerText.Trim();
 
-                                if (text.StartsWith("{{voir") || RegexLib.StartWithLangSectionRegex.IsMatch(text))
+                                if (text.StartsWith("{{voir") || RegexLibFr.StartWithLangSectionRegex.IsMatch(text))
                                 {
-                                    if (RegexLib.ContainsLangSectionRegex.IsMatch(text))
+                                    if (RegexLibFr.ContainsLangSectionRegex.IsMatch(text))
                                     {
-                                        var wikiPage = new WikiPage(title, text);
-                                        if (wikiPage.IsOnlyVerbFlexion() == false)
+                                        var wikiPage = new WikiPage(title, text,sectionBuilder);
+                                        if (wikiPage.IsVerbFlexion == false)
                                         {
                                             PagesList.Add(wikiPage);
                                             correctWikiPageWords[wikiPage.TitleInv] = true;
@@ -341,7 +347,7 @@ namespace WiktionaireParser
 
                 GetAnagramFor(page.AnagramKey);
                 var validWord = GetAllValidWordFor(page.AnagramKey);
-                txtAllPossibleWord.Text = validWord.ToString();
+                txtAllPossibleWord.Text = validWord?.ToString();
             }
         }
 
@@ -403,6 +409,7 @@ namespace WiktionaireParser
         }
         private ValidWord GetAllValidWordFor(string key)
         {
+            return null;
             try
             {
                 var result = DawgService.FindAllPossibleWord(key);

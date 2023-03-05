@@ -72,21 +72,21 @@ namespace WiktionaireParser.ui
         public CrossWordGridGen()
         {
             InitializeComponent();
-            gridSize = 9;
-            DawgService = MainWindow.DawgService;
-            wordListCopy = wordList.ToList();
-            cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
-            cbsGridSize.SelectedIndex = 2;
+            //gridSize = 9;
+            //DawgService = MainWindow.DawgService;
+            //wordListCopy = wordList.ToList();
+            //cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
+            //cbsGridSize.SelectedIndex = 2;
 
-            AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm().Distinct().ToList();
-            lbxDicoCrossWord.ItemsSource = AllWords;
-            cbxBranchLimit.ItemsSource = Enumerable.Range(0, 10);
-            cbxBranchLimit.SelectedIndex = 0;
+            //AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm().Distinct().ToList();
+            //lbxDicoCrossWord.ItemsSource = AllWords;
+            //cbxBranchLimit.ItemsSource = Enumerable.Range(0, 10);
+            //cbxBranchLimit.SelectedIndex = 0;
 
-            cbxDepthLimit.ItemsSource = Enumerable.Range(1, 5);
-            cbxDepthLimit.SelectedIndex = 0;
+            //cbxDepthLimit.ItemsSource = Enumerable.Range(1, 5);
+            //cbxDepthLimit.SelectedIndex = 0;
 
-            frequencyDico = LoadFrequencyDico(frequencyDicoFileName);
+            //frequencyDico = LoadFrequencyDico(frequencyDicoFileName);
         }
 
         Dictionary<string, float> LoadFrequencyDico(string frequencyDicoFileName)

@@ -110,7 +110,7 @@
                     <TextBox x:Name="txtAllPossibleWord" Grid.Column="1" Grid.Row="1" Text="TextBox" TextWrapping="Wrap" Background="#FF84BD9C" Grid.RowSpan="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" AcceptsReturn="True" AcceptsTab="True"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="TabItem">
+            <TabItem Header="TabItem" Width="NaN">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="213"/>
@@ -123,7 +123,7 @@
                     <Button x:Name="cmdRemoveVerbFromScrabbleDico" Content="Remove Verb From Scrabble Dico" HorizontalAlignment="Center" Height="51" Margin="0,24,0,0" VerticalAlignment="Top" Width="148" Click="cmdRemoveVerbFromScrabbleDico_Click"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="ParseDump" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
+            <TabItem Header="ParseDump" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="68*"/>
@@ -136,9 +136,14 @@
                     <Button x:Name="cmdParseDump" Content="Parse Dump" HorizontalAlignment="Left" Height="33" Margin="30,0,0,0" VerticalAlignment="Center" Width="72" Click="cmdParseDump_Click"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="FREQUENCY PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
+            <TabItem Header="FREQUENCY PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center">
                 <Grid Background="#FFE5E5E5">
                     <ui:WordFrequencyParser/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="WIKTIO PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="NaN">
+                <Grid Background="#FFE5E5E5">
+                    <ui:WiktioParser/>
                 </Grid>
             </TabItem>
         </TabControl>

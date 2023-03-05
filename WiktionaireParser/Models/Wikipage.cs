@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using CommonLibTools;
@@ -28,6 +29,8 @@ namespace WiktionaireParser.Models
         public bool IsVerbFlexion;
         public bool IsNomCommun;
         public bool IsAdjective;
+        public bool IsAdverbe;
+        public bool IsPronom;
 
         // frequency 
 
@@ -36,7 +39,7 @@ namespace WiktionaireParser.Models
         public float Frequency { get; set; }
         public long MostFrequentWordCount { get; set; }
 
-        public WikiPage(string title, string text)
+        public WikiPage(string title, string text, SectionBuilder sectionBuilder)
         {
             Title = title;
             TitleInv = title.ToLowerInvariant().RemoveDiacritics();
@@ -44,14 +47,19 @@ namespace WiktionaireParser.Models
             Text = text;
             Len = Title.Length;
 
-            ExtractData();
+            ExtractData(sectionBuilder);
         }
 
-        public bool IsOnlyVerbFlexion()
-        {
-            return IsVerbFlexion == true && IsNomCommun == false && IsVerb == false;
-        }
-        void ExtractData()
+        //public bool IsOnlyVerbFlexion()
+        //{
+        //    return IsVerbFlexion == true 
+        //           && IsNomCommun == false 
+        //           && IsVerb == false
+        //           && IsAdjective==false 
+        //           && IsPronom==false 
+        //           && IsAdverbe==false;
+        //}
+        void ExtractData(SectionBuilder sectionBuilder)
         {
             var lines = Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             var sectionFound = false;
@@ -60,42 +68,34 @@ namespace WiktionaireParser.Models
             foreach (var lin in lines)
             {
                 var line = lin.Trim();
-                if (RegexLib.StartWithLangSectionRegex.IsMatch(line))
+                if (RegexLibFr.StartWithLangSectionRegex.IsMatch(line))
                 {
                     sectionFound = true;
                     langLines.Add(line);
                     builder.AppendLine(line);
+
+                    sectionBuilder.AddSection(lin);
                     continue;
                 }
-                //if (line.StartsWith("== {{langue|fr}} =="))
-                //{
-                //    sectionFound = true;
-                //    langLines.Add(line);
-                //    builder.AppendLine(line);
-                //    continue;
-                //}
+
                 if (sectionFound)
                 {
-                    if (RegexLib.OtherLangSectionRegex.IsMatch(line))
+                    if (RegexLibFr.SectionRegex.IsMatch(lin))
                     {
-                        //new lang section 
-                        break;
+                        sectionBuilder.AddSection(lin);
+                    }
+
+                    // if (RegexLib.OtherLangSectionRegex.IsMatch(line))
+                    if (RegexLibFr.StartWithOtherLangSectionRegex.IsMatch(line))
+                    {
+                        sectionFound = false;
+                        // break;
                     }
                     else
                     {
                         langLines.Add(line);
                         builder.AppendLine(line);
                     }
-                    //if (line.StartsWith("== {{langue"))
-                    //{
-                    //    //new lang section 
-                    //    break;
-                    //}
-                    //else
-                    //{
-                    //    langLines.Add(line);
-                    //    builder.AppendLine(line);
-                    //}
                 }
             }
 
@@ -103,10 +103,42 @@ namespace WiktionaireParser.Models
             var infosBuilder = new StringBuilder();
             for (var index = 0; index < langLines.Count; index++)
             {
-                var line = langLines[index];
-                if (line.StartsWith("=== {{S|verbe|fr}} ===")) IsVerb = true;
-                if (line.StartsWith("=== {{S|verbe|fr|flexion}} ===")) IsVerbFlexion = true;
-                if (line.StartsWith("=== {{S|nom|fr")) IsNomCommun = true;
+                var line = langLines[index];//.ToLower();
+                var lowerLine = line.ToLowerInvariant().Trim();
+
+                //verbs
+                if (RegexLibFr.VerbRegex.IsMatch(line)) IsVerb = true;
+                if (RegexLibFr.VerbRegex2.IsMatch(line)) IsVerb = true;
+                if (RegexLibFr.VerbFlexionRegex.IsMatch(line))
+                {
+                    //Debug.WriteLine($"### verb flexion {Title}");
+                    sectionBuilder.AddVerbFlexion($"{Title} __ {TitleInv}");
+                    IsVerbFlexion = true;
+                }
+
+                //noms
+                if (RegexLibFr.NomCommunRegex.IsMatch(line)) IsNomCommun = true;
+                if (RegexLibFr.NomCommunRegex2.IsMatch(line)) IsNomCommun = true;
+                if (RegexLibFr.NomCommunRegex3.IsMatch(line)) IsNomCommun = true;
+
+                //adjectif
+                if (RegexLibFr.AdjectifRegex.IsMatch(lowerLine)) IsAdjective = true;
+                if (RegexLibFr.AdjectifRegex2.IsMatch(lowerLine)) IsAdjective = true;
+                if (RegexLibFr.AdjectifRegex3.IsMatch(lowerLine)) IsAdjective = true;
+
+                //adverbe
+                if (RegexLibFr.AdverbeRegex.IsMatch(lowerLine)) IsAdverbe = true;
+                if (RegexLibFr.AdverbeRegex2.IsMatch(lowerLine)) IsAdverbe = true;
+
+
+                //pronom
+                if (RegexLibFr.PronomRegex.IsMatch(lowerLine)) IsPronom = true;
+                if (RegexLibFr.PronomRegex2.IsMatch(lowerLine)) IsPronom = true;
+
+
+                //if (line.StartsWith("=== {{S|verbe|fr}} ===")) IsVerb = true;
+                //if (line.StartsWith("=== {{S|verbe|fr|flexion}} ===")) IsVerbFlexion = true;
+                //if (line.StartsWith("=== {{S|nom|fr")) IsNomCommun = true;
 
                 //antonyms 
                 var endSection = false;
@@ -119,7 +151,7 @@ namespace WiktionaireParser.Models
 
                         if (line.StartsWith("*") || line.StartsWith("#"))
                         {
-                            var matches = RegexLib.regexLink.Matches(line);
+                            var matches = RegexLibFr.regexLink.Matches(line);
                             foreach (Match match in matches)
                             {
                                 infosBuilder.AppendLine(match.Groups[1].Value);
@@ -146,7 +178,7 @@ namespace WiktionaireParser.Models
 
                         if (line.StartsWith("*") || line.StartsWith("#"))
                         {
-                            var matches = RegexLib.regexLink.Matches(line);
+                            var matches = RegexLibFr.regexLink.Matches(line);
                             foreach (Match match in matches)
                             {
                                 infosBuilder.AppendLine(match.Groups[1].Value);
