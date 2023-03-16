@@ -15,7 +15,7 @@ namespace Test
         {
             //constructTrie.GenerateTrieFromFile(@"C:\Users\mboum\Desktop\web\verbes\ods8_final.txt");
             //constructTrie.GenerateTrieFromFile(@"G:\zzzWiktionnaire\DICO\ODS7.txt");
-            constructTrie.GenerateTrieFromFile(@"D:\__programs_datas\ods8_final_no_verbs_4_to_7.txt");
+            constructTrie.GenerateTrieFromFile(@"D:\zzzWiktionnaire\DICO\ODS8.txt");
 
 
             //var text = File.ReadAllText(@"D:\__programs_datas\wiki_valid_word_trie.txt");

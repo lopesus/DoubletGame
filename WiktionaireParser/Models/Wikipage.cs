@@ -50,6 +50,16 @@ namespace WiktionaireParser.Models
             ExtractData(sectionBuilder);
         }
 
+        public void AddDataFrom(WikiPage wikiPage)
+        {
+            Text += $"\r\n######################\r\n {wikiPage.Text}";
+            if (!IsVerb) IsVerb = wikiPage.IsVerb;
+            if (!IsVerbFlexion) IsVerbFlexion = wikiPage.IsVerbFlexion;
+            if (!IsNomCommun) IsNomCommun = wikiPage.IsNomCommun;
+            if (!IsAdjective) IsAdjective = wikiPage.IsAdjective;
+            if (!IsAdverbe) IsAdverbe = wikiPage.IsAdverbe;
+            if (!IsPronom) IsPronom = wikiPage.IsPronom;
+        }
         //public bool IsOnlyVerbFlexion()
         //{
         //    return IsVerbFlexion == true 

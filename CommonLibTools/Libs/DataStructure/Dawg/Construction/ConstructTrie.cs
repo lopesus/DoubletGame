@@ -43,7 +43,7 @@ namespace CommonLibTools.Libs.DataStructure.Dawg.Construction
             var dir = Path.GetDirectoryName(fileName);
             var temP = $"{Path.GetFileNameWithoutExtension(fileName)}_trie.txt";
             //var saveToFileName = Path.Combine(dir, temP);
-            var saveToFileName = @"D:\__programs_datas\" + temP;
+            var saveToFileName =Path.Combine(dir, temP);
             ConstructTrieWorker(lines, saveToFileName);
         }
 

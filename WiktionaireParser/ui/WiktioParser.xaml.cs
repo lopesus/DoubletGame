@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using CommonLibTools.Libs;
+using CommonLibTools.Libs.DataStructure.Dawg.Construction;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
 
@@ -43,8 +44,8 @@ namespace WiktionaireParser.ui
         int pageToSkipFromDb = 0;
         private int pageToParseCount = Int32.MaxValue;
 
-        private string ods8 = @"D:\zzzWiktionnaire\DICO\ODS8.txt";
-        private Dictionary<string, bool> OfficiaScrabblelWordList = new Dictionary<string, bool>();
+        private string officialScrabbleDico = @"D:\zzzWiktionnaire\DICO\ODS8.txt";
+        private Dictionary<string, bool> officiaScrabbleWordList = new Dictionary<string, bool>();
         public WiktioParser()
         {
             InitializeComponent();
@@ -58,7 +59,7 @@ namespace WiktionaireParser.ui
             WiktioParserResultFolder = MainWindow.WiktioParserResultFolder;
             Database = MainWindow.Database;
 
-            OfficiaScrabblelWordList = File.ReadAllLines(ods8).ToList().ToDictionary(s => s.ToLowerInvariant(), s => true);
+            officiaScrabbleWordList = File.ReadAllLines(officialScrabbleDico).ToList().ToDictionary(s => s.ToLowerInvariant(), s => true);
 
 
         }
@@ -81,10 +82,35 @@ namespace WiktionaireParser.ui
             frequencyBuilder.CheckAllWord(correctWikiPageWords);
 
             SaveToDB(PagesList);
+            SaveWordBoxdico(3, 15, true);
+            SaveWordBoxdico(4, 7);
+            SaveWordBoxdico(4, 8);
             MessageBox.Show($"Parse Wiki Dump in {stopwatch.Elapsed.TotalMinutes} minutes");
             LoadPagesFromDb();
         }
 
+        private void SaveWordBoxdico(int minWordLen, int maxWordLen, bool createTrie = false)
+        {
+            var list = PagesList.Where(p => p.TitleInv.Length >= minWordLen && p.TitleInv.Length <= maxWordLen)
+                .Select(p => p.TitleInv)
+                .OrderBy(p => p.Length).ThenBy(p => p)
+                .ToList();
+
+            var builder = new StringBuilder();
+            foreach (var text in list)
+            {
+                builder.AppendLine(text);
+            }
+
+            var path = $"{WiktioParserResultFolder}/wordbox_valid_word_{minWordLen}_{maxWordLen}.txt";
+            var contents = builder.ToString();
+            File.WriteAllText(path, contents);
+            if (createTrie)
+            {
+                ConstructTrie constructTrie = new ConstructTrie();
+                constructTrie.GenerateTrieFromFile(path);
+            }
+        }
 
         public void SplitDicoToPage(string fileName)
         {
@@ -93,6 +119,7 @@ namespace WiktionaireParser.ui
             //count = int.MaxValue;
             var builder = new StringBuilder();
             SectionBuilder sectionBuilder = new SectionBuilder();
+            Dictionary<string, List<WikiPage>> ExistingWord = new Dictionary<string, List<WikiPage>>();
             using (StreamReader sr = File.OpenText(fileName))
             {
                 string line = String.Empty;
@@ -151,15 +178,28 @@ namespace WiktionaireParser.ui
                                     if (RegexLibFr.ContainsLangSectionRegex.IsMatch(text))
                                     {
                                         var wikiPage = new WikiPage(title, text, sectionBuilder);
-                                        if (wikiPage.IsVerbFlexion == false && wikiPage.TitleInv.Length >= 3 && OfficiaScrabblelWordList.ContainsKey(wikiPage.TitleInv))
+                                        if (wikiPage.IsVerbFlexion == false && wikiPage.TitleInv.Length >= 3 && officiaScrabbleWordList.ContainsKey(wikiPage.TitleInv))
                                         {
-                                            PagesList.Add(wikiPage);
-                                            correctWikiPageWords[wikiPage.TitleInv] = true;
+                                            if (ExistingWord.ContainsKey(wikiPage.TitleInv))
+                                            {
+                                                var pages = ExistingWord[wikiPage.TitleInv];
+                                                var first = pages.First();
+                                                first.AddDataFrom(wikiPage);
+                                                pages.Add(wikiPage);
 
-                                            // anagram calculation
-                                            var anagram = title.ToLowerInvariant().RemoveDiacritics();
-                                            var anagramKey = anagram.SortString();
-                                            anagramBuilder.Add(anagramKey, anagram);
+                                            }
+                                            else
+                                            {
+                                                ExistingWord.Add(wikiPage.TitleInv, new List<WikiPage>(){wikiPage});
+
+                                                PagesList.Add(wikiPage);
+                                                correctWikiPageWords[wikiPage.TitleInv] = true;
+                                                // anagram calculation
+                                                var anagram = title.ToLowerInvariant().RemoveDiacritics();
+                                                var anagramKey = anagram.SortString();
+                                                anagramBuilder.Add(anagramKey, anagram);
+                                            }
+                                            
 
                                             // word frequency calculation
                                             var tokenList = text
