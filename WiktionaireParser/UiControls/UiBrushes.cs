@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace WiktionaireParser.ui
+namespace WiktionaireParser.UiControls
 {
     public static class UiBrushes
     {

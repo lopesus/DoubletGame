@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 using CommonLibTools.Libs;
 using CommonLibTools.Libs.DataStructure.Dawg.Construction;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
 
-namespace WiktionaireParser.ui
+namespace WiktionaireParser.UiControls
 {
     /// <summary>
     /// Interaction logic for WiktioParser.xaml
@@ -49,6 +41,12 @@ namespace WiktionaireParser.ui
         public WiktioParser()
         {
             InitializeComponent();
+
+            txtTest.Text2 = "demo";
+            txtTest.Header = "header";
+
+            cbxTest2.ItemsSource= Enumerable.Range(1,10).ToList();
+
             Database = MainWindow.Database;
             WikiCollection = MainWindow.WikiCollection;
             AnagramCollection = MainWindow.AnagramCollection;
@@ -83,8 +81,8 @@ namespace WiktionaireParser.ui
 
             SaveToDB(PagesList);
             SaveWordBoxdico(3, 15, true);
-            SaveWordBoxdico(4, 7);
-            SaveWordBoxdico(4, 8);
+            SaveWordBoxdico(4, 7,true);
+            SaveWordBoxdico(4, 8,true);
             MessageBox.Show($"Parse Wiki Dump in {stopwatch.Elapsed.TotalMinutes} minutes");
             LoadPagesFromDb();
         }
@@ -311,6 +309,11 @@ namespace WiktionaireParser.ui
                 //var validWord = GetAllValidWordFor(page.AnagramKey);
                 //txtAllPossibleWord.Text = validWord.ToString();
             }
+        }
+
+        private void cbxTest2_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

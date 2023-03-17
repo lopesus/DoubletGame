@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="WiktionaireParser.UiControls.Custom.TextBox2"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WiktionaireParser.UiControls.Custom"
+             mc:Ignorable="d" 
+             d:DesignHeight="55" d:DesignWidth="300">
+    <Grid Background="#7FE7F4F4" Height="NaN">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TextBox2}}}" VerticalAlignment="Center" MinHeight="15" MinWidth="30" />
+        <TextBox Text="{Binding Text2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TextBox2}}}" VerticalContentAlignment="Center" Grid.Column="1" Margin="5,0,0,0"/>
+    </Grid>
+</UserControl> 

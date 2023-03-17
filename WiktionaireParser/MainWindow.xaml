@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WiktionaireParser"
-        xmlns:ui="clr-namespace:WiktionaireParser.ui" x:Class="WiktionaireParser.MainWindow"
+        xmlns:uiControls="clr-namespace:WiktionaireParser.UiControls"
+        x:Class="WiktionaireParser.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="924" Width="1787" WindowState="Maximized">
     <Grid>
@@ -66,7 +67,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <ui:CrossWordGridGen/>
+                                <uiControls:CrossWordGridGen/>
                             </Grid>
                         </TabItem>
                         <TabItem x:Name="text" Header="TEXT" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
@@ -138,12 +139,12 @@
             </TabItem>
             <TabItem Header="FREQUENCY PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center">
                 <Grid Background="#FFE5E5E5">
-                    <ui:WordFrequencyParser/>
+                    <uiControls:WordFrequencyParser/>
                 </Grid>
             </TabItem>
             <TabItem Header="WIKTIO PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="NaN">
                 <Grid Background="#FFE5E5E5">
-                    <ui:WiktioParser/>
+                    <uiControls:WiktioParser/>
                 </Grid>
             </TabItem>
         </TabControl>
