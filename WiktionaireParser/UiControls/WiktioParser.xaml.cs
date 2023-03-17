@@ -64,6 +64,10 @@ namespace WiktionaireParser.UiControls
 
         private void cmdParse_Click(object sender, RoutedEventArgs e)
         {
+            var selectedItem = cbxTest2.GetSelectedItem();
+            var ddd = selectedItem.ToString();
+            var dddg = txtTest.Text2;
+            return;
             Database.DropCollection(wikiCollectionName);
             Database.DropCollection(AnagramCollection.CollectionNamespace.CollectionName);
             WikiCollection = Database.GetCollection<WikiPage>(wikiCollectionName);

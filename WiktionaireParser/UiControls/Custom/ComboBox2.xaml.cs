@@ -23,6 +23,11 @@ namespace WiktionaireParser.UiControls.Custom
         {
             InitializeComponent();
         }
+
+        public object GetSelectedItem()
+        {
+            return comboBox.SelectedItem;
+        }
         public static readonly DependencyProperty HeaderProperty =
             DependencyProperty.Register("Header", typeof(string), typeof(ComboBox2), new PropertyMetadata("Header"));
 
@@ -42,13 +47,13 @@ namespace WiktionaireParser.UiControls.Custom
             set { SetValue(ItemsSourceProperty, value); }
         }
 
-        public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register("SelectedItem", typeof(object), typeof(ComboBox2), new PropertyMetadata(null));
+        //public static readonly DependencyProperty SelectedItemProperty =
+        //    DependencyProperty.Register("SelectedItem", typeof(object), typeof(ComboBox2), new PropertyMetadata(null));
 
-        public object SelectedItem
-        {
-            get { return (object)GetValue(SelectedItemProperty); }
-            set { SetValue(SelectedItemProperty, value); }
-        }
+        //public object SelectedItem
+        //{
+        //    get { return (object)GetValue(SelectedItemProperty); }
+        //    set { SetValue(SelectedItemProperty, value); }
+        //}
     }
 }

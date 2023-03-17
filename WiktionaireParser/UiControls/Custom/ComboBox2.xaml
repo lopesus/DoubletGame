@@ -12,6 +12,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" Text="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ComboBox2}}}" MinWidth="24" VerticalAlignment="Center"/>
-        <ComboBox Grid.Column="1" x:Name="comboBox" ItemsSource="{Binding ItemsSource}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" VerticalContentAlignment="Center" DataContext="{Binding ElementName=userControl, Mode=OneWay}"/>
+        <ComboBox Grid.Column="1" x:Name="comboBox" ItemsSource="{Binding ItemsSource}" VerticalContentAlignment="Center" DataContext="{Binding ElementName=userControl, Mode=OneWay}"/>
     </Grid>
 </UserControl>
