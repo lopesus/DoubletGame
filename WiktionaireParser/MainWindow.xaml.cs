@@ -31,6 +31,7 @@ namespace WiktionaireParser
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static string WiktioLangCode = @"fr";
         public static string WiktioFileName = @"D:\zzzWiktionnaire\frwiktionary-latest-pages-articles.xml";
         public static string WiktioParserResultFolder = @"";
         private string folder = @"D:\zzzWiktionnaire\";
@@ -40,7 +41,8 @@ namespace WiktionaireParser
         public static IMongoCollection<WikiPage> WikiCollection;
         public static IMongoCollection<Anagram> AnagramCollection;
         public static IMongoCollection<WordFrequency> WordFrequencyCollection;
-        public static string wikiCollectionName;
+        public static string WikiCollectionName;
+        public static string AnagramCollectionName;
 
         int pageToLoadFromDb = Int32.MaxValue;
         int pageToSkipFromDb = 0;
@@ -55,23 +57,32 @@ namespace WiktionaireParser
         public static Trie Trie;
         public static DawgService DawgService;
 
-       public static string DicoName = @"D:\__programs_datas\ods8_final_no_verbs_4_to_7.txt";
-       public static string DicoTrieName = @"D:\__programs_datas\ods8_final_no_verbs_4_to_7_trie.txt";
+       public static string DicoName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_4_7.txt";
+       public static string DicoTrieName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_4_7_trie.txt";
+
+       public static int MinLen = 3;
+       public static int MaxLen = 7;
 
         public MainWindow()
         {
             var resultFolder = Path.GetFileNameWithoutExtension(WiktioFileName).Split('-').FirstOrDefault();
             WiktioParserResultFolder = Path.Combine(Path.GetDirectoryName(WiktioFileName),$"{resultFolder}_Parse");
             Directory.CreateDirectory(WiktioParserResultFolder);
+            DicoName = Path.Combine(WiktioParserResultFolder, $"wordbox_valid_word_{MinLen}_{MaxLen}.txt");
+            DicoTrieName = Path.Combine(WiktioParserResultFolder, $"wordbox_valid_word_{MinLen}_{MaxLen}_trie.txt");
+
+
             //constructTrie.GenerateTrieFromFile(@"C:\Users\mboum\Desktop\web\verbes\ods8_final.txt");
 
             // To directly connect to a single MongoDB server
             // (this will not auto-discover the primary even if it's a member of a replica set)
             client = new MongoClient();
             Database = client.GetDatabase("wiki");
-            wikiCollectionName = "fr";
-            WikiCollection = Database.GetCollection<WikiPage>(wikiCollectionName);
-            AnagramCollection = Database.GetCollection<Anagram>("anagram");
+            WikiCollectionName = $"WordBox_{WiktioLangCode}";
+            WikiCollection = Database.GetCollection<WikiPage>(WikiCollectionName);
+
+            AnagramCollectionName = $"WordBox_anagram_{WiktioLangCode}";
+            AnagramCollection = Database.GetCollection<Anagram>(AnagramCollectionName);
             WordFrequencyCollection = Database.GetCollection<WordFrequency>("WordFrequency");
 
             SetDbIndex();
@@ -89,14 +100,22 @@ namespace WiktionaireParser
             cbxAnagramCount.ItemsSource = Enumerable.Range(0, 20);//.Select(x => x * x);
             cbxAnagramCount.SelectedIndex = 0;
 
-            // LoadPagesFromDb();
-
-            //LoadTrie();
+            
         }
 
-        private void LoadPagesFromDb()
+
+        private void cmdLoadWordList_Click(object sender, RoutedEventArgs e)
         {
-            PagesList = WikiCollection.Find(FilterDefinition<WikiPage>.Empty).Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
+            LoadPagesFromDb(MinLen,MaxLen);
+            LoadTrie();
+        }
+
+        private void LoadPagesFromDb(int min, int max)
+        {
+            var filter = Builders<WikiPage>.Filter;
+            var pageFilter = filter.Gte(p => p.Len, min) & filter.Lte(p => p.Len, max);
+            PagesList = WikiCollection.Find(pageFilter) //FilterDefinition<WikiPage>.Empty
+                .Skip(pageToSkipFromDb).Limit(pageToLoadFromDb)
                 .Sort(Builders<WikiPage>.Sort.Ascending(p => p.Title))
                 .ToList();
 
@@ -162,21 +181,21 @@ namespace WiktionaireParser
             lbxPages.ItemsSource = PagesList;
             tblCount.Text = $"found {PagesList.Count}";
         }
-        public void ParseWikiDump()
-        {
-            Database.DropCollection(wikiCollectionName);
-            WikiCollection = Database.GetCollection<WikiPage>(wikiCollectionName);
+        //public void ParseWikiDump()
+        //{
+        //    Database.DropCollection(WikiCollectionName);
+        //    WikiCollection = Database.GetCollection<WikiPage>(WikiCollectionName);
 
-            anagramBuilder = new AnagramBuilder();
-            SplitDicoToPage();
-            //remove non valid word in frequency builder
+        //    anagramBuilder = new AnagramBuilder();
+        //    SplitDicoToPage();
+        //    //remove non valid word in frequency builder
 
-            frequencyBuilder.CheckAllWord(correctWikiPageWords);
+        //    frequencyBuilder.CheckAllWord(correctWikiPageWords);
 
-            SaveToDB(PagesList);
-            MessageBox.Show("Parse Wiki Dump");
-            LoadPagesFromDb();
-        }
+        //    SaveToDB(PagesList);
+        //    MessageBox.Show("Parse Wiki Dump");
+        //    LoadPagesFromDb(MinLen,MaxLen);
+        //}
         private async void SetDbIndex()
         {
 
@@ -353,7 +372,7 @@ namespace WiktionaireParser
 
         private void cmdParseDump_Click(object sender, RoutedEventArgs e)
         {
-            ParseWikiDump();
+            //ParseWikiDump();
         }
 
         private async void cmdTrouverMot_Click(object sender, RoutedEventArgs e)
@@ -374,7 +393,7 @@ namespace WiktionaireParser
                     GetAnagramFor(page.AnagramKey);
 
                     var validWord = GetAllValidWordFor(page.AnagramKey);
-                    txtAllPossibleWord.Text = validWord.ToString();
+                    txtAllPossibleWord.Text = validWord?.ToString() ?? string.Empty;
                 }
                 catch (Exception exception)
                 {
@@ -409,7 +428,6 @@ namespace WiktionaireParser
         }
         private ValidWord GetAllValidWordFor(string key)
         {
-            return null;
             try
             {
                 var result = DawgService.FindAllPossibleWord(key);
@@ -492,5 +510,6 @@ namespace WiktionaireParser
             File.WriteAllText(fileName, result.ToString());
             MessageBox.Show("done");
         }
+
     }
 }

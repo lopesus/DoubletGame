@@ -6,12 +6,12 @@
              xmlns:local="clr-namespace:WiktionaireParser.UiControls.Custom"
              mc:Ignorable="d" 
              d:DesignHeight="55" d:DesignWidth="300">
-    <Grid Background="#7FE7F4F4" Height="NaN">
+    <Grid Height="NaN">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TextBox2}}}" VerticalAlignment="Center" MinHeight="15" MinWidth="30" />
-        <TextBox Text="{Binding Text2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TextBox2}}}" VerticalContentAlignment="Center" Grid.Column="1" Margin="5,0,0,0"/>
+        <TextBlock Text="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TextBox2}}}" VerticalAlignment="Center" MinHeight="15" MinWidth="30" Margin="0,0,10,0" />
+        <TextBox Text="{Binding Text2, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TextBox2}}}" VerticalContentAlignment="Center" Grid.Column="1"/>
     </Grid>
 </UserControl> 

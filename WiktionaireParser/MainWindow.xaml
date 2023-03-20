@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WiktionaireParser"
         xmlns:uiControls="clr-namespace:WiktionaireParser.UiControls"
+        xmlns:Custom="clr-namespace:WiktionaireParser.UiControls.Custom"
         x:Class="WiktionaireParser.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="924" Width="1787" WindowState="Maximized">
@@ -30,6 +31,7 @@
                         </Grid.ColumnDefinitions>
                         <Grid x:Name="filterGrid" Background="#FF7DB8CF">
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="80"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -42,15 +44,20 @@
                                 <ColumnDefinition Width="118"/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <CheckBox x:Name="chkAnto" Content="antonym" Margin="5,5,5,5"/>
-                            <CheckBox x:Name="chkSino" Content="sinonymes" Grid.Row="1" Margin="5,5,5,5"/>
-                            <CheckBox x:Name="chkVerb" Content="is verb" Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="2"/>
-                            <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="2" Grid.Row="5" Click="cmdSerachFilter_Click" Height="30"/>
-                            <TextBlock x:Name="tblCount" Grid.Row="2" Text="TextBlock" TextWrapping="Wrap"/>
-                            <ComboBox x:Name="cbxLength" Grid.Column="2"/>
-                            <CheckBox x:Name="chkAnagram" Content="anagram ?" Grid.Row="5" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="cbxAnagramCount" Grid.Column="1" Grid.Row="5"/>
-                            <CheckBox x:Name="chkFrequency" Content="sort frequency" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <CheckBox x:Name="chkAnto" Content="antonym" Margin="5,5,5,5" Grid.Row="1"/>
+                            <CheckBox x:Name="chkSino" Content="sinonymes" Grid.Row="2" Margin="5,5,5,5"/>
+                            <CheckBox x:Name="chkVerb" Content="is verb" Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="2" Grid.Row="1"/>
+                            <Button x:Name="cmdSerachFilter" Content="filter result" Grid.Column="2" Grid.Row="6" Click="cmdSerachFilter_Click" Height="30"/>
+                            <TextBlock x:Name="tblCount" Grid.Row="3" Text="TextBlock" TextWrapping="Wrap"/>
+                            <ComboBox x:Name="cbxLength" Grid.Column="2" Grid.Row="1"/>
+                            <CheckBox x:Name="chkAnagram" Content="anagram ?" Grid.Row="6" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="cbxAnagramCount" Grid.Column="1" Grid.Row="6"/>
+                            <CheckBox x:Name="chkFrequency" Content="sort frequency" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <Canvas Grid.ColumnSpan="3" Background="White">
+                                <Button x:Name="cmdLoadWordList" Content="LOAD WORD LIST" Height="34" Canvas.Left="17" Canvas.Top="10" Width="120" Click="cmdLoadWordList_Click"/>
+                                <Custom:TextBox2 Height="34" Canvas.Left="157" Canvas.Top="10" Width="135"/>
+                                <Custom:ComboBox2 Height="34" Canvas.Left="312" Canvas.Top="10" Width="140"/>
+                            </Canvas>
                         </Grid>
                         <StackPanel Background="#FFCB8787" Orientation="Horizontal" Grid.Column="1">
                             <TextBox x:Name="txtMot" Height="33" TextWrapping="Wrap" Width="118" Margin="5,5,5,5"/>

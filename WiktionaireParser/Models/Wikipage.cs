@@ -60,15 +60,15 @@ namespace WiktionaireParser.Models
             if (!IsAdverbe) IsAdverbe = wikiPage.IsAdverbe;
             if (!IsPronom) IsPronom = wikiPage.IsPronom;
         }
-        //public bool IsOnlyVerbFlexion()
-        //{
-        //    return IsVerbFlexion == true 
-        //           && IsNomCommun == false 
-        //           && IsVerb == false
-        //           && IsAdjective==false 
-        //           && IsPronom==false 
-        //           && IsAdverbe==false;
-        //}
+        public bool IsOnlyVerbFlexion()
+        {
+            return IsVerbFlexion == true
+                   && IsNomCommun == false
+                   && IsVerb == false
+                   && IsAdjective == false
+                   && IsPronom == false
+                   && IsAdverbe == false;
+        }
         void ExtractData(SectionBuilder sectionBuilder)
         {
             var lines = Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -117,8 +117,8 @@ namespace WiktionaireParser.Models
                 var lowerLine = line.ToLowerInvariant().Trim();
 
                 //verbs
-                if (RegexLibFr.VerbRegex.IsMatch(line)) IsVerb = true;
-                if (RegexLibFr.VerbRegex2.IsMatch(line)) IsVerb = true;
+                if (RegexLibFr.VerbRegex.IsMatch(line) && line.Contains("flexion") == false) IsVerb = true;
+                if (RegexLibFr.VerbRegex2.IsMatch(line) && line.Contains("flexion") == false) IsVerb = true;
                 if (RegexLibFr.VerbFlexionRegex.IsMatch(line))
                 {
                     //Debug.WriteLine($"### verb flexion {Title}");
