@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Xml;
 using CommonLibTools.Libs;
 using CommonLibTools.Libs.DataStructure.Dawg.Construction;
+using CommonLibTools.Libs.Extensions;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
 using static System.Net.Mime.MediaTypeNames;
@@ -245,9 +246,12 @@ namespace WiktionaireParser.UiControls
                 }
             }
 
+
+            var singularKeys = SelectedFinalWords.Keys.ToList().RemovePluralForm();
             //build pagelist of valid words
-            foreach (var wikiPage in SelectedFinalWords.Values)
+            foreach (var key in singularKeys)
             {
+                var wikiPage = SelectedFinalWords[key];
                 if (wikiPage.IsVerbFlexion == false && wikiPage.TitleInv.Length >= 3 && officiaScrabbleWordList.ContainsKey(wikiPage.TitleInv))
                 {
                     PagesList.Add(wikiPage);
@@ -258,6 +262,20 @@ namespace WiktionaireParser.UiControls
                     anagramBuilder.Add(anagramKey, anagram);
                 }
             }
+
+            ////build pagelist of valid words
+            //foreach (var wikiPage in SelectedFinalWords.Values)
+            //{
+            //    if (wikiPage.IsVerbFlexion == false && wikiPage.TitleInv.Length >= 3 && officiaScrabbleWordList.ContainsKey(wikiPage.TitleInv))
+            //    {
+            //        PagesList.Add(wikiPage);
+            //        correctWikiPageWords[wikiPage.TitleInv] = true;
+            //        // anagram calculation
+            //        var anagram = wikiPage.TitleInv;
+            //        var anagramKey = anagram.SortString();
+            //        anagramBuilder.Add(anagramKey, anagram);
+            //    }
+            //}
 
             
             // word frequency calculation
@@ -270,7 +288,10 @@ namespace WiktionaireParser.UiControls
 
                 foreach (var token in tokenList)
                 {
-                    frequencyBuilder.AddWord(token.ToLowerInvariant().RemoveDiacritics());
+                    if (SelectedFinalWords.ContainsKey(token))
+                    {
+                        frequencyBuilder.AddWord(token.ToLowerInvariant().RemoveDiacritics());
+                    }
                 }
             }
 
@@ -282,6 +303,14 @@ namespace WiktionaireParser.UiControls
             verbFlexion.Sort();
             File.WriteAllLines($"{WiktioParserResultFolder}/VerbFlexion.txt", verbFlexion);
 
+            var list = frequencyBuilder.GetFrequencyLists();
+            builder.Clear();
+            builder.AppendLine($"AllWordCount {frequencyBuilder.AllWordCount}");
+            foreach (var wordFrequency in list)
+            {
+                builder.AppendLine($"{wordFrequency.Key.PadRight(15,' ')} {wordFrequency.Count.ToString().PadRight(10, ' ')} zipf-{wordFrequency.ZipfFrequency.ToString().PadRight(5,' ')} {wordFrequency.Frequency:N10}");
+            }
+            File.WriteAllText($"{WiktioParserResultFolder}/ValidWordsFrequency.txt", builder.ToString());
         }
 
         public async void SaveToDB(List<WikiPage> list)
@@ -309,23 +338,23 @@ namespace WiktionaireParser.UiControls
                 await AnagramCollection.InsertManyAsync(anagramsList);
             }
 
-            //save single page
-            Directory.CreateDirectory($"{WiktioParserResultFolder}/pages");
-            foreach (var wikiPage in list)
-            {
-                var path = $"{WiktioParserResultFolder}/pages/{wikiPage.TitleInv}.txt";
-                //Debug.WriteLine($"saving {path}");
+            ////save single page
+            //Directory.CreateDirectory($"{WiktioParserResultFolder}/pages");
+            //foreach (var wikiPage in list)
+            //{
+            //    var path = $"{WiktioParserResultFolder}/pages/{wikiPage.TitleInv}.txt";
+            //    //Debug.WriteLine($"saving {path}");
 
-                try
-                {
-                    File.WriteAllText(path, wikiPage.Text);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(path);
-                    // throw;
-                }
-            }
+            //    try
+            //    {
+            //        File.WriteAllText(path, wikiPage.Text);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        Debug.WriteLine(path);
+            //        // throw;
+            //    }
+            //}
 
             File.WriteAllText($"{WiktioParserResultFolder}/wiki_valid_word.txt", builder.ToString());
         }

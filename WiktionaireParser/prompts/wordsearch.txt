@@ -1,0 +1,13 @@
+﻿The prompt for the WordSearch exercise is to create a C# class that generates various kinds of words for a given input word. The class should have the following properties:
+
+A Word property that holds the input word.
+    A Permutations property that holds a list of all possible permutations of the input word.
+    An AdjacentWords property that holds a list of all possible words that can be formed by changing one letter of the input word.
+    A OneLetterWords property that holds a list of all possible words that can be formed by changing one letter of the input word and that exist in a given dictionary.
+    The class should also have the following methods:
+
+A private GeneratePermutations method that generates all permutations of the input word using a recursive algorithm.
+    A private GenerateAdjacentWords method that generates all adjacent words by changing one letter of the input word using parallelism.
+    A private GenerateOneLetterWords method that generates all one-letter words by changing one letter of the input word and checking against a given dictionary using parallelism.
+    A public constructor that takes the input word and a dictionary as parameters and initializes the Permutations, AdjacentWords, and OneLetterWords properties.
+    The class should use thread-safe collections such as ConcurrentBag<string> to store the generated words and ensure thread safety when generating the AdjacentWords and OneLetterWords lists in parallel.

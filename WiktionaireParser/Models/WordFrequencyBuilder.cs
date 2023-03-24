@@ -79,7 +79,7 @@ namespace WiktionaireParser.Models
             var result=new List<WordFrequency>();
             foreach (var pair in WordDico)
             {
-                result.Add(new WordFrequency(pair.Key,pair.Value,0));
+                result.Add(new WordFrequency(pair.Key,pair.Value,AllWordCount));
             }
 
             return result.OrderByDescending(f=>f.Count).ToList();

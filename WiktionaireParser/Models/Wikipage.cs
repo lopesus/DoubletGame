@@ -212,7 +212,7 @@ namespace WiktionaireParser.Models
 
         public override string ToString()
         {
-            return $"{Title}";
+            return $"{TitleInv} - {Title}";
         }
     }
 }

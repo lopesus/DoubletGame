@@ -14,7 +14,7 @@
             <TabItem Header="TabItem">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition Width="200"/>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="200"/>
@@ -74,7 +74,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <uiControls:CrossWordGridGen/>
+                                <uiControls:CrossWordGridGen Loaded="CrossWordGridGen_Loaded"/>
                             </Grid>
                         </TabItem>
                         <TabItem x:Name="text" Header="TEXT" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="54">
@@ -152,6 +152,11 @@
             <TabItem Header="WIKTIO PARSER" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="NaN">
                 <Grid Background="#FFE5E5E5">
                     <uiControls:WiktioParser/>
+                </Grid>
+            </TabItem>
+            <TabItem HorizontalAlignment="Center" Height="20" Header="DOUBLET FINDER" VerticalAlignment="Center" IsSelected="True" >
+                <Grid Background="#FFE5E5E5">
+                    <uiControls:DoubletFinder/>
                 </Grid>
             </TabItem>
         </TabControl>

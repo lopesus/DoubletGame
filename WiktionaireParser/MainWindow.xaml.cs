@@ -357,7 +357,7 @@ namespace WiktionaireParser
             var page = lbxPages.SelectedItem as WikiPage;
             if (page != null)
             {
-                txtPageLangText.Text = page.LangText;
+                txtPageLangText.Text = page.Text;// page.LangText;
                 txtAllPageText.Text = page.Text;
                 txtAntonymes.Text = page.Antonymes;
                 txtSynonymes.Text = page.Sinonymes;
@@ -511,5 +511,9 @@ namespace WiktionaireParser
             MessageBox.Show("done");
         }
 
+        private void CrossWordGridGen_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

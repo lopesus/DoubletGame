@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,7 +23,7 @@ namespace DoubletGame
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string fileName = @"G:\____ all dico word games\doublet word ladder\fr\___dico_doublet_ 4.txt";
+        private string fileName = @"D:\zzzWiktionnaire\DICO\ODS8.txt";
         DoubletFinder finder;
         private List<string> selection;
         private List<string> doubletResultList;
@@ -30,11 +31,12 @@ namespace DoubletGame
 
         public MainWindow()
         {
-            var list = File.ReadAllLines(fileName).ToList();
+            var list = File.ReadAllLines(fileName).Select(m=>m.ToLowerInvariant()).ToList();
             var hash=new HashSet<string>(list);
             wordList = hash.ToList();
 
             InitializeComponent();
+            lbxWorlist.ItemsSource = wordList;
         }
 
         private void lbxWorlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -67,12 +69,13 @@ namespace DoubletGame
                 size = 4;
             }
 
-            selection = wordList;//.Where(w => w.Length == size).ToList();
+            selection = wordList.Where(w => w.Length == size).ToList();
             tblResult.Text = $" found {selection.Count} of {size}";
             lbxWorlist.ItemsSource = selection;
 
             finder = new DoubletFinder(selection);
             finder.FindDoublet();
+            lbxWorlist.SelectedIndex = 0;
         }
 
         private void txtFindLink_Click(object sender, RoutedEventArgs e)

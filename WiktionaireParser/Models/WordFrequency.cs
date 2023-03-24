@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using CommonLibTools.Libs;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace WiktionaireParser.Models
 {
@@ -15,9 +16,10 @@ namespace WiktionaireParser.Models
             }
             else
             {
-                Frequency = Count / (float)AllWordCount;
+                Frequency = Count*100 / (float)AllWordCount;
             }
 
+            ZipfFrequency = LetterFrequency.GetZipfFrequency(Count, AllWordCount);
         }
 
         public override string ToString()
@@ -30,5 +32,6 @@ namespace WiktionaireParser.Models
         public long Count { get; set; }
         public long AllWordCount { get; set; }
         public float Frequency { get; set; }
+        public double ZipfFrequency { get; set; }
     }
 }

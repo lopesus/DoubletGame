@@ -55,5 +55,14 @@ namespace WiktionaireParser.UiControls.Custom
         //    get { return (object)GetValue(SelectedItemProperty); }
         //    set { SetValue(SelectedItemProperty, value); }
         //}
+        public void SelectIndex(int i)
+        {
+            comboBox.SelectedIndex=i;
+        }
+
+        public int GetSelectedIndex()
+        {
+            return comboBox.SelectedIndex;
+        }
     }
 }

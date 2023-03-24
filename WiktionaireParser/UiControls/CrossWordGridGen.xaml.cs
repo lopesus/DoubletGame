@@ -62,19 +62,19 @@ namespace WiktionaireParser.UiControls
         public CrossWordGridGen()
         {
             InitializeComponent();
-            //gridSize = 9;
-            //DawgService = MainWindow.DawgService;
-            //wordListCopy = wordList.ToList();
-            //cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
-            //cbsGridSize.SelectedIndex = 2;
+            gridSize = 9;
+            DawgService = MainWindow.DawgService;
+            wordListCopy = wordList.ToList();
+            cbsGridSize.ItemsSource = Enumerable.Range(7, 12);
+            cbsGridSize.SelectIndex(2);
 
-            //AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm().Distinct().ToList();
-            //lbxDicoCrossWord.ItemsSource = AllWords;
-            //cbxBranchLimit.ItemsSource = Enumerable.Range(0, 10);
-            //cbxBranchLimit.SelectedIndex = 0;
+            AllWords = File.ReadAllLines(MainWindow.DicoName).ToList().RemovePluralForm().Distinct().ToList();
+            lbxDicoCrossWord.ItemsSource = AllWords;
+            cbxBranchLimit.ItemsSource = Enumerable.Range(0, 10);
+            cbxBranchLimit.SelectIndex(0);
 
-            //cbxDepthLimit.ItemsSource = Enumerable.Range(1, 5);
-            //cbxDepthLimit.SelectedIndex = 0;
+            cbxDepthLimit.ItemsSource = Enumerable.Range(1, 5);
+            cbxDepthLimit.SelectIndex(0);
 
             //frequencyDico = LoadFrequencyDico(frequencyDicoFileName);
         }
@@ -132,7 +132,7 @@ namespace WiktionaireParser.UiControls
                     var zipf = frequencyDico[crossWord.Word];
                     crossWord.Freq = zipf;
                 }
-                lbxFitWord.ItemsSource = gen.FitWordList.OrderByDescending(w=>w.Freq);
+                lbxFitWord.ItemsSource = gen.FitWordList.OrderByDescending(w => w.Freq);
             }
         }
 
@@ -179,7 +179,7 @@ namespace WiktionaireParser.UiControls
             {
                 var word = allWord.Key;
                 var list1 = allWord.Value;
-                var result = GenGrid.GenAll(word, list1, gridSize, BranchLimit,DepthLimit,frequencyDico);
+                var result = GenGrid.GenAll(word, list1, gridSize, BranchLimit, DepthLimit, frequencyDico);
                 var grid = result.OrderByDescending(g => g.FitWordList.Count)
                     .ThenBy(g => g.Grid.BaryDistance).FirstOrDefault();
 
@@ -251,7 +251,7 @@ namespace WiktionaireParser.UiControls
                      gridSize = 7;
                  }
 
-                 var result = GenGrid.GenAll(word, list1, gridSize, BranchLimit,DepthLimit,frequencyDico);
+                 var result = GenGrid.GenAll(word, list1, gridSize, BranchLimit, DepthLimit, frequencyDico);
                  if (result?.Count > 0)
                  {
                      var grid = result.OrderByDescending(g => g.FitWordList.Count)
@@ -264,14 +264,14 @@ namespace WiktionaireParser.UiControls
 
             var final = genGrids.OrderByDescending(g => g.Difficulty).ToList();
             var allUnique = final.GroupBy(x => x.Letters).All(g => g.Count() == 1);
-            if (allUnique==false)
+            if (allUnique == false)
             {
                 var duplicate = final.GroupBy(x => x.Letters)
                     .Where(g => g.Count() > 1).Select(g => g.Key).ToList();
 
                 var @join = string.Join(" ", duplicate);
                 MessageBox.Show($" NOT ALL UNIQUE \r\n {@join}");
-               
+
             }
             lbxGeneators.ItemsSource = final;
             CrossWordGame crossWordGame = new CrossWordGame(Lang.Fr, final);
@@ -290,10 +290,14 @@ namespace WiktionaireParser.UiControls
         }
         private void cmdGenMany_Click(object sender, RoutedEventArgs e)
         {
-            start=DateTime.UtcNow;
-            gridSize = (int)cbsGridSize.SelectedValue;
+            GetBranchLimit();
+            GetDepthLimit();
+            GetGridSize();
+
+            start = DateTime.UtcNow;
+            gridSize = (int)cbsGridSize.GetSelectedItem();
             DawgService = MainWindow.DawgService;
-            var text = txtWordForGrid.Text.ToLowerInvariant().RemoveDiacritics();
+            var text = txtWordForGrid.Text2.ToLowerInvariant().RemoveDiacritics();
             if (text.IsNullOrEmptyString())
             {
                 text = "cure";
@@ -312,12 +316,12 @@ namespace WiktionaireParser.UiControls
             tblAllWord.Text = temp;
 
             //GenerateManyGrid(list1, gridSize);
-            var result = GenGrid.GenAll(text, list1, gridSize, BranchLimit,DepthLimit,frequencyDico);
+            var result = GenGrid.GenAll(text, list1, gridSize, BranchLimit, DepthLimit, frequencyDico);
             lbxGeneators.ItemsSource = result
                 .OrderByDescending(g => g.FitWordList.Count)
                 .ThenBy(g => g.Grid.BaryDistance);
 
-            end=DateTime.UtcNow;
+            end = DateTime.UtcNow;
             var diff = end.Subtract(start);
             tblResultCount.Text = $"gen many {result.Count} \r\ntime {diff.TotalSeconds} sec branch {BranchLimit} depth {DepthLimit}";
 
@@ -577,9 +581,9 @@ namespace WiktionaireParser.UiControls
 
         }
 
-        private void cbsGridSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void GetGridSize()
         {
-            int size = (int)cbsGridSize.SelectedValue;
+            int size = (int)cbsGridSize.GetSelectedItem();
 
             NumRow = size;
             NumCol = size;
@@ -595,18 +599,18 @@ namespace WiktionaireParser.UiControls
             var mot = lbxDicoCrossWord.SelectedItem as string;
             if (mot != null)
             {
-                txtWordForGrid.Text = mot;
+                txtWordForGrid.Text2 = mot;
             }
         }
 
-        private void cbxBranchLimit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void GetBranchLimit()
         {
-            BranchLimit = cbxBranchLimit.SelectedIndex;
+            BranchLimit = cbxBranchLimit.GetSelectedIndex();
         }
 
-        private void cbxDepthLimit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void GetDepthLimit()
         {
-            DepthLimit = (int) cbxDepthLimit.SelectedValue;
+            DepthLimit = (int)cbxDepthLimit.GetSelectedIndex();
         }
     }
 }
