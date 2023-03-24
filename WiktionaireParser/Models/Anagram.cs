@@ -9,7 +9,7 @@ namespace WiktionaireParser.Models
         public string Key { get; set; }
 
         public int Count { get; set; }
-        public List<string> AnagramList { get; set; }
+        public List<string> AnagramList { get; set; }=new List<string>();
 
         private Dictionary<string, bool> existDico;
 
