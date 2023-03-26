@@ -24,13 +24,13 @@ namespace WiktionaireParser.UiControls
     /// </summary>
     public partial class DoubletFinder : UserControl
     {
-        //string DicoName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_3_15.txt";
-        private string DicoName = @"D:\zzzWiktionnaire\DICO\ODS8.txt";
+        string DicoName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_3_7.txt";
+        //string DicoName = @"D:\zzzWiktionnaire\DICO\ODS8.txt";
 
         private List<string> wordList;
-        private  HashSet<string> wordListHash;
-        private  List<string> AllWordslist;
-        AnagramBuilder anagramBuilder=new AnagramBuilder();
+        private HashSet<string> wordListHash;
+        private List<string> AllWordslist;
+        AnagramBuilder anagramBuilder = new AnagramBuilder();
 
         public DoubletFinder()
         {
@@ -49,7 +49,7 @@ namespace WiktionaireParser.UiControls
                 var anagramKey = anagram.SortString();
                 anagramBuilder.Add(anagramKey, anagram);
             }
-           
+
         }
 
         private void lbxWordList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -60,7 +60,7 @@ namespace WiktionaireParser.UiControls
             var list = ShiftUtils.GenerateWordsByInsertion(word);
 
             var valid = list.Where(w => AllWordslist.Contains(w));
-            var builder=new StringBuilder();
+            var builder = new StringBuilder();
             builder.AppendLine($"all words");
             var res = string.Join(" ", list);
             builder.AppendLine(res);
@@ -71,7 +71,7 @@ namespace WiktionaireParser.UiControls
             //anagrams
             builder.AppendLine().AppendLine($"valid permutations");
             var anagramList = anagramBuilder.GetAnagramFor(word.SortString())?.AnagramList;
-            builder.AppendLine(string.Join(" ", anagramList??new List<string>()));
+            builder.AppendLine(string.Join(" ", anagramList ?? new List<string>()));
             txtResult.Text = builder.ToString();
         }
 
@@ -79,7 +79,7 @@ namespace WiktionaireParser.UiControls
         {
             int len = Convert.ToInt32(cbxLen.GetSelectedItem().ToString());
 
-            wordListHash = new HashSet<string>(AllWordslist.Where(w=>w.Length==len));
+            wordListHash = new HashSet<string>(AllWordslist.Where(w => w.Length == len));
             wordList = wordListHash.ToList();
 
             lbxWordList.ItemsSource = wordList;

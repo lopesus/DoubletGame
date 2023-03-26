@@ -191,6 +191,17 @@ namespace CommonLibTools.Libs.Extensions
         //    return obj;
         //}
 
+        public static string RemoveWhitespace(this string input)
+        {
+            if (input != null)
+            {
+                return Regex.Replace(input, @"\s+", "");
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         public static List<int> GetAllIndexOf(this string word, string car)
         {

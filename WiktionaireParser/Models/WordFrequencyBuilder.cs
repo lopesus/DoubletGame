@@ -26,6 +26,25 @@ namespace WiktionaireParser.Models
             LetterDico = new Dictionary<char, long>();
         }
 
+        public void AddWord(string word,int count)
+        {
+            if (word == null) return;
+            if (WordDico.ContainsKey(word))
+            {
+                WordDico[word] += count;
+            }
+            else
+            {
+                WordDico[word] = count;
+            }
+
+            AllWordCount+=count;
+
+            if (WordDico[word] > MostFrequentWordCount)
+            {
+                MostFrequentWordCount = WordDico[word];
+            }
+        }
         public void AddWord(string word)
         {
             if (word == null) return;
@@ -46,18 +65,18 @@ namespace WiktionaireParser.Models
             }
 
             //count letter 
-            foreach (var car in word.ToCharArray())
-            {
-                if (LetterDico.ContainsKey(car))
-                {
-                    LetterDico[car] += 1;
-                }
-                else
-                {
-                    LetterDico[car] = 1;
-                }
-                LetterCount++;
-            }
+            //foreach (var car in word.ToCharArray())
+            //{
+            //    if (LetterDico.ContainsKey(car))
+            //    {
+            //        LetterDico[car] += 1;
+            //    }
+            //    else
+            //    {
+            //        LetterDico[car] = 1;
+            //    }
+            //    LetterCount++;
+            //}
         }
 
         public WordFrequency GetWordFrequency(string word)

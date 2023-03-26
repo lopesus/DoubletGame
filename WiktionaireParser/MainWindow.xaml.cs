@@ -57,16 +57,16 @@ namespace WiktionaireParser
         public static Trie Trie;
         public static DawgService DawgService;
 
-       public static string DicoName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_4_7.txt";
-       public static string DicoTrieName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_4_7_trie.txt";
+        public static string DicoName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_4_7.txt";
+        public static string DicoTrieName = @"D:\zzzWiktionnaire\frwiktionary_Parse\wordbox_valid_word_4_7_trie.txt";
 
-       public static int MinLen = 3;
-       public static int MaxLen = 7;
+        public static int MinLen = 3;
+        public static int MaxLen = 7;
 
         public MainWindow()
         {
             var resultFolder = Path.GetFileNameWithoutExtension(WiktioFileName).Split('-').FirstOrDefault();
-            WiktioParserResultFolder = Path.Combine(Path.GetDirectoryName(WiktioFileName),$"{resultFolder}_Parse");
+            WiktioParserResultFolder = Path.Combine(Path.GetDirectoryName(WiktioFileName), $"{resultFolder}_Parse");
             Directory.CreateDirectory(WiktioParserResultFolder);
             DicoName = Path.Combine(WiktioParserResultFolder, $"wordbox_valid_word_{MinLen}_{MaxLen}.txt");
             DicoTrieName = Path.Combine(WiktioParserResultFolder, $"wordbox_valid_word_{MinLen}_{MaxLen}_trie.txt");
@@ -96,17 +96,14 @@ namespace WiktionaireParser
             cbxLength.ItemsSource = Enumerable.Range(0, 10);//.Select(x => x * x);
             cbxLength.SelectedIndex = 5;
 
-
             cbxAnagramCount.ItemsSource = Enumerable.Range(0, 20);//.Select(x => x * x);
             cbxAnagramCount.SelectedIndex = 0;
-
-            
         }
 
 
         private void cmdLoadWordList_Click(object sender, RoutedEventArgs e)
         {
-            LoadPagesFromDb(MinLen,MaxLen);
+            LoadPagesFromDb(MinLen, MaxLen);
             LoadTrie();
         }
 
@@ -133,7 +130,7 @@ namespace WiktionaireParser
             DawgService = new DawgService(lines);
             Trie = DawgService.GetTrie();
 
-            
+
 
         }
 
@@ -235,7 +232,7 @@ namespace WiktionaireParser
             int pageCount = 0;
             //count = int.MaxValue;
             var builder = new StringBuilder();
-            SectionBuilder sectionBuilder= new SectionBuilder();
+            SectionBuilder sectionBuilder = new SectionBuilder();
             using (StreamReader sr = File.OpenText(WiktioFileName))
             {
                 string line = String.Empty;
@@ -254,7 +251,7 @@ namespace WiktionaireParser
                         } while (line != null && line.Trim().StartsWith("</page>") == false);
 
                         var page = builder.ToString();
-                          pageCount++;
+                        pageCount++;
 
                         //Console.WriteLine(page);
 
@@ -274,7 +271,7 @@ namespace WiktionaireParser
                                 Console.WriteLine();
                             }
                             var firstChar = title[0];
-                            if ( title.ContainsOnlyLettersAToZ()
+                            if (title.ContainsOnlyLettersAToZ()
                                 //char.IsLetter(firstChar)
                                 //&& char.IsUpper(firstChar) == false
                                 //&& title.Contains("-") == false && title.Contains(" ") == false
@@ -292,7 +289,7 @@ namespace WiktionaireParser
                                 {
                                     if (RegexLibFr.ContainsLangSectionRegex.IsMatch(text))
                                     {
-                                        var wikiPage = new WikiPage(title, text,sectionBuilder);
+                                        var wikiPage = new WikiPage(title, text, sectionBuilder);
                                         if (wikiPage.IsVerbFlexion == false)
                                         {
                                             PagesList.Add(wikiPage);
@@ -357,7 +354,7 @@ namespace WiktionaireParser
             var page = lbxPages.SelectedItem as WikiPage;
             if (page != null)
             {
-                txtPageLangText.Text = page.Text;// page.LangText;
+                txtPageLangText.Text = page.LangText;// page.LangText;
                 txtAllPageText.Text = page.Text;
                 txtAntonymes.Text = page.Antonymes;
                 txtSynonymes.Text = page.Sinonymes;
@@ -484,8 +481,7 @@ namespace WiktionaireParser
                     }
                 }
             }
-
-
+            
             File.WriteAllText(newName, final.ToString());
             MessageBox.Show("done");
         }

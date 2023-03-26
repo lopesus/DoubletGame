@@ -27,7 +27,7 @@ namespace WiktionaireParser.UiControls
         private DateTime start;
         private DateTime end;
 
-        string frequencyDicoFileName = @"D:\__programs_datas\ods8_final_no_verbs_4_to_7_with_freq.txt";
+        private string frequencyDicoFileName = @"D:\zzzWiktionnaire\frwiktionary_Parse\ValidWordsFrequency.txt";
 
         public CrossWordGrid Grid { get; set; }
 
@@ -76,7 +76,7 @@ namespace WiktionaireParser.UiControls
             cbxDepthLimit.ItemsSource = Enumerable.Range(1, 5);
             cbxDepthLimit.SelectIndex(0);
 
-            //frequencyDico = LoadFrequencyDico(frequencyDicoFileName);
+           // frequencyDico = LoadFrequencyDico(frequencyDicoFileName);
         }
 
         Dictionary<string, float> LoadFrequencyDico(string frequencyDicoFileName)
@@ -140,6 +140,7 @@ namespace WiktionaireParser.UiControls
 
         private void cmdGenGameLevel_Click(object sender, RoutedEventArgs e)
         {
+            return;
             //SelectLevelSequential();
             SelectLevelParallel();
         }

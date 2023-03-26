@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using CommonLibTools;
 using CommonLibTools.Libs;
+using CommonLibTools.Libs.Extensions;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace WiktionaireParser.Models
@@ -53,6 +54,7 @@ namespace WiktionaireParser.Models
         public void AddDataFrom(WikiPage wikiPage)
         {
             Text += $"\r\n######################\r\n {wikiPage.Text}";
+            LangText += $"\r\n######################\r\n {wikiPage.LangText}";
             if (!IsVerb) IsVerb = wikiPage.IsVerb;
             if (!IsVerbFlexion) IsVerbFlexion = wikiPage.IsVerbFlexion;
             if (!IsNomCommun) IsNomCommun = wikiPage.IsNomCommun;
@@ -60,6 +62,7 @@ namespace WiktionaireParser.Models
             if (!IsAdverbe) IsAdverbe = wikiPage.IsAdverbe;
             if (!IsPronom) IsPronom = wikiPage.IsPronom;
         }
+
         public bool IsOnlyVerbFlexion()
         {
             return IsVerbFlexion == true
@@ -69,6 +72,7 @@ namespace WiktionaireParser.Models
                    && IsPronom == false
                    && IsAdverbe == false;
         }
+
         void ExtractData(SectionBuilder sectionBuilder)
         {
             var lines = Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -114,12 +118,12 @@ namespace WiktionaireParser.Models
             for (var index = 0; index < langLines.Count; index++)
             {
                 var line = langLines[index];//.ToLower();
-                var lowerLine = line.ToLowerInvariant().Trim();
+                var lowerLine = line.ToLowerInvariant().Trim().RemoveWhitespace();
 
                 //verbs
-                if (RegexLibFr.VerbRegex.IsMatch(line) && line.Contains("flexion") == false) IsVerb = true;
-                if (RegexLibFr.VerbRegex2.IsMatch(line) && line.Contains("flexion") == false) IsVerb = true;
-                if (RegexLibFr.VerbFlexionRegex.IsMatch(line))
+                if (RegexLibFr.VerbRegex.IsMatch(lowerLine) && line.Contains("flexion") == false) IsVerb = true;
+                if (RegexLibFr.VerbRegex2.IsMatch(lowerLine) && line.Contains("flexion") == false) IsVerb = true;
+                if (RegexLibFr.VerbFlexionRegex.IsMatch(lowerLine))
                 {
                     //Debug.WriteLine($"### verb flexion {Title}");
                     sectionBuilder.AddVerbFlexion($"{Title} __ {TitleInv}");
@@ -127,9 +131,9 @@ namespace WiktionaireParser.Models
                 }
 
                 //noms
-                if (RegexLibFr.NomCommunRegex.IsMatch(line)) IsNomCommun = true;
-                if (RegexLibFr.NomCommunRegex2.IsMatch(line)) IsNomCommun = true;
-                if (RegexLibFr.NomCommunRegex3.IsMatch(line)) IsNomCommun = true;
+                if (RegexLibFr.NomCommunRegex.IsMatch(lowerLine)) IsNomCommun = true;
+                if (RegexLibFr.NomCommunRegex2.IsMatch(lowerLine)) IsNomCommun = true;
+                if (RegexLibFr.NomCommunRegex3.IsMatch(lowerLine)) IsNomCommun = true;
 
                 //adjectif
                 if (RegexLibFr.AdjectifRegex.IsMatch(lowerLine)) IsAdjective = true;
@@ -152,7 +156,7 @@ namespace WiktionaireParser.Models
 
                 //antonyms 
                 var endSection = false;
-                if (line.StartsWith("==== {{S|antonymes}} ===="))
+                if (lowerLine.StartsWith("===={{S|antonymes}}===="))
                 {
                     do
                     {
@@ -179,7 +183,7 @@ namespace WiktionaireParser.Models
                 //synonymes 
                 endSection = false;
                 infosBuilder.Clear();
-                if (line.StartsWith("==== {{S|synonymes}} ===="))
+                if (lowerLine.StartsWith("===={{S|synonymes}}===="))
                 {
                     do
                     {

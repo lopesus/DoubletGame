@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
@@ -43,9 +46,6 @@ namespace WiktionaireParser.UiControls
         public WiktioParser()
         {
             InitializeComponent();
-
-            txtTest.Text2 = "demo";
-            txtTest.Header = "header";
 
             cbxTest2.ItemsSource = Enumerable.Range(1, 10).ToList();
 
@@ -124,6 +124,8 @@ namespace WiktionaireParser.UiControls
             }
         }
 
+
+
         public void SplitDicoToPage(string fileName)
         {
 
@@ -132,7 +134,9 @@ namespace WiktionaireParser.UiControls
             var builder = new StringBuilder();
             SectionBuilder sectionBuilder = new SectionBuilder();
             Dictionary<string, WikiPage> ExistingWord = new Dictionary<string, WikiPage>();
-            Dictionary<string, WikiPage>SelectedFinalWords = new Dictionary<string, WikiPage>();
+            Dictionary<string, WikiPage> SelectedFinalWords = new Dictionary<string, WikiPage>();
+            var onlyVerbFlexion = new List<string>();
+
             using (StreamReader sr = File.OpenText(fileName))
             {
                 string line = String.Empty;
@@ -207,7 +211,7 @@ namespace WiktionaireParser.UiControls
                                             else
                                             {
                                                 ExistingWord.Add(wikiPage.TitleInv, wikiPage);
-                                                SelectedFinalWords.Add(wikiPage.TitleInv,wikiPage);
+                                                SelectedFinalWords.Add(wikiPage.TitleInv, wikiPage);
                                             }
                                         }
 
@@ -252,7 +256,8 @@ namespace WiktionaireParser.UiControls
             foreach (var key in singularKeys)
             {
                 var wikiPage = SelectedFinalWords[key];
-                if (wikiPage.IsVerbFlexion == false && wikiPage.TitleInv.Length >= 3 && officiaScrabbleWordList.ContainsKey(wikiPage.TitleInv))
+                if (wikiPage.IsOnlyVerbFlexion() == false && wikiPage.TitleInv.Length >= 3 && officiaScrabbleWordList.ContainsKey(wikiPage.TitleInv))
+                //if (wikiPage.IsVerbFlexion == false && wikiPage.TitleInv.Length >= 3 && officiaScrabbleWordList.ContainsKey(wikiPage.TitleInv))
                 {
                     PagesList.Add(wikiPage);
                     correctWikiPageWords[wikiPage.TitleInv] = true;
@@ -260,6 +265,10 @@ namespace WiktionaireParser.UiControls
                     var anagram = wikiPage.TitleInv;
                     var anagramKey = anagram.SortString();
                     anagramBuilder.Add(anagramKey, anagram);
+                }
+                else
+                {
+                    onlyVerbFlexion.Add(key);
                 }
             }
 
@@ -277,7 +286,7 @@ namespace WiktionaireParser.UiControls
             //    }
             //}
 
-            
+
             // word frequency calculation
             foreach (var wikiPage in PagesList)
             {
@@ -299,16 +308,23 @@ namespace WiktionaireParser.UiControls
             sectionList.Sort();
             File.WriteAllLines($"{WiktioParserResultFolder}/sectionList.txt", sectionList);
 
+            sectionList = sectionBuilder.SectionsWithNoSpace.ToList();
+            sectionList.Sort();
+            File.WriteAllLines($"{WiktioParserResultFolder}/SectionsWithNoSpaceList.txt", sectionList);
+
             var verbFlexion = sectionBuilder.VerbFlexion.ToList();
             verbFlexion.Sort();
             File.WriteAllLines($"{WiktioParserResultFolder}/VerbFlexion.txt", verbFlexion);
+            File.WriteAllLines($"{WiktioParserResultFolder}/OnlyVerbFlexion.txt", onlyVerbFlexion);
+
+
 
             var list = frequencyBuilder.GetFrequencyLists();
             builder.Clear();
             builder.AppendLine($"AllWordCount {frequencyBuilder.AllWordCount}");
             foreach (var wordFrequency in list)
             {
-                builder.AppendLine($"{wordFrequency.Key.PadRight(15,' ')} {wordFrequency.Count.ToString().PadRight(10, ' ')} zipf-{wordFrequency.ZipfFrequency.ToString().PadRight(5,' ')} {wordFrequency.Frequency:N10}");
+                builder.AppendLine($"{wordFrequency.Key.PadRight(15, ' ')} {wordFrequency.Count.ToString().PadRight(10, ' ')} zipf-{wordFrequency.ZipfFrequency.ToString().PadRight(5, ' ')} {wordFrequency.Frequency:N10}");
             }
             File.WriteAllText($"{WiktioParserResultFolder}/ValidWordsFrequency.txt", builder.ToString());
         }
@@ -393,6 +409,157 @@ namespace WiktionaireParser.UiControls
         private void cbxTest2_Loaded(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void cmdBuildWordFreqFromwikipedia_Click(object sender, RoutedEventArgs e)
+        {
+
+            Stopwatch stopwatch = new Stopwatch();
+            // Avvia il timer
+            stopwatch.Start();
+
+            var frequencyBuilder = new WordFrequencyBuilder();
+            var dico = CountWords(@"D:\zzzWiktionnaire\wikipedia\frwiki_pages", "*.txt");
+            foreach (var words in dico)
+            {
+                frequencyBuilder.AddWord(words.Key, words.Value);
+            }
+
+            var list = frequencyBuilder.GetFrequencyLists();
+
+            stopwatch.Stop();
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine($"AllWordCount {frequencyBuilder.AllWordCount}");
+            foreach (var wordFrequency in list)
+            {
+                builder.AppendLine($"{wordFrequency.Key.PadRight(28, ' ')} {wordFrequency.Count.ToString().PadRight(10, ' ')} zipf-{wordFrequency.ZipfFrequency.ToString().PadRight(5, ' ')} {wordFrequency.Frequency:N10}");
+            }
+            File.WriteAllText($"{WiktioParserResultFolder}/zzzWikipediaFrequency.txt", builder.ToString());
+
+            MessageBox.Show($"Parse Wiki pages for frequency in {stopwatch.Elapsed.TotalMinutes} minutes");
+
+        }
+
+        private ConcurrentDictionary<string, int> CountWords(string directory, string fileExtension)
+        {
+
+            //var text = wikiPage.Text;
+            //var tokenList = text
+            //    .Split(" .\n\r\t\b\0\\=?^+-*’–<>!|([{)}]#@,:;?\"'%&/".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+            //    .Where(w => w.Length >= 3);
+
+            //foreach (var token in tokenList)
+            //{
+            //    if (SelectedFinalWords.ContainsKey(token))
+            //    {
+            //        frequencyBuilder.AddWord(token.ToLowerInvariant().RemoveDiacritics());
+            //    }
+            //}
+
+            var bigFileDir = $@"{directory}\_bigFiles";
+            var smallFileDir = $@"{directory}\_smallFiles";
+
+            Directory.CreateDirectory(bigFileDir);
+            Directory.CreateDirectory(smallFileDir);
+
+            long processed = 0;
+
+            var wordCounts = new ConcurrentDictionary<string, int>();
+
+            // Get the list of files in the directory
+            //string[] files = Directory.GetFiles(directory, fileExtension);
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+            FileInfo[] fileInfos = directoryInfo.GetFiles("*.*",SearchOption.TopDirectoryOnly);
+            //FileInfo[] fileInfos = directoryInfo.GetFiles();
+
+            // Process each file in parallel
+            Parallel.ForEach(fileInfos, fileInfo =>
+            {
+                if (GetFileSizeInKilobytes(fileInfo)>50)
+                {
+                    MoveFileToDirectory(fileInfo.FullName,bigFileDir);
+                    //ChangeFileExtension(fileInfo.FullName, "bigText");
+                    return;
+                }
+
+                if (GetFileSizeInKilobytes(fileInfo) <= 1)
+                {
+                    MoveFileToDirectory(fileInfo.FullName, smallFileDir);
+                    //ChangeFileExtension(fileInfo.FullName, "bigText");
+                    return;
+                }
+
+                // Read the file into a string
+                string text = File.ReadAllText(fileInfo.FullName).ToLowerInvariant().RemoveDiacritics();
+
+                // Split the text into words
+                var words = text
+                    .Split(" .\n\r\t\b\0\\=?^+-*’–<>!|([{)}]#@,:;?\"'%&/".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                    .Where(w => w.Length >= 3);
+
+                // string[] words = text.Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                // Count the occurrence of each word and add it to the dictionary
+                foreach (string word in words)
+                {
+                    if (officiaScrabbleWordList.ContainsKey(word))
+                    {
+                        wordCounts.AddOrUpdate(word.ToLower(), 1, (key, oldValue) => oldValue + 1);
+                    }
+                }
+
+                ChangeFileExtension(fileInfo.FullName,"old");
+
+                Interlocked.Increment(ref processed);
+                if (processed% 50000==0)
+                {
+                    var currentCount = processed;
+                    Console.WriteLine($"processed {processed} files");
+                    Debug.WriteLine($"processed {processed} files");
+                    var builder=new StringBuilder();
+                    foreach (var pair in wordCounts)
+                    {
+                        builder.AppendLine($"{pair.Key} {pair.Value}");
+                    }
+                    File.WriteAllText($"{WiktioParserResultFolder}/zzzWikipediaFrequency{currentCount}.txt", builder.ToString());
+                }
+            });
+            return wordCounts;
+
+        }
+
+
+        public static void MoveFileToDirectory(string filePath, string directoryPath)
+        {
+            string fileName = Path.GetFileName(filePath);
+            string newFilePath = Path.Combine(directoryPath, fileName);
+
+            File.Move(filePath, newFilePath);
+        }
+
+        public static long GetFileSizeInKilobytes(FileInfo fileInfo)
+        {
+            return (fileInfo.Length ) / 1024;
+        }
+        public static void ChangeFileExtension(string filePath, string newExtension)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string newFileName = fileName + "." + newExtension;
+            string newFilePath = Path.Combine(Path.GetDirectoryName(filePath), newFileName);
+
+            File.Move(filePath, newFilePath);
+        }
+
+        public static void RenameFileWithExtensionSuffix(string filePath, string suffix)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string fileExtension = Path.GetExtension(filePath);
+
+            string newFileName = fileName + suffix + fileExtension;
+            string newFilePath = Path.Combine(Path.GetDirectoryName(filePath), newFileName);
+
+            File.Move(filePath, newFilePath);
         }
     }
 }

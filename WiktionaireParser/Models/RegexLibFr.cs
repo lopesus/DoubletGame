@@ -23,18 +23,18 @@ namespace WiktionaireParser.Models
 
         //adjectif
         public static Regex AdjectifRegex = new Regex(@"\{\{S\|adj\|fr\b");
-        public static Regex AdjectifRegex2 = new Regex(@"\{\{S\|(adjectif (exclamatif|indefini|possessif|demonstratif|interrogatif|numeral))\|fr\b");
+        public static Regex AdjectifRegex2 = new Regex(@"\{\{S\|(adjectif(exclamatif|indefini|possessif|demonstratif|interrogatif|numeral))\|fr\b");
         public static Regex AdjectifRegex3 = new Regex(@"\{\{S\|adjectif\|fr\}");
 
         //Adverbe
         public static Regex AdverbeRegex = new Regex(@"\{\{S\|(adv|adverbe)\|fr\b");
-        public static Regex AdverbeRegex2 = new Regex(@"\{\{S\|adverbe (interrogatif|relatif)\|fr\b");
+        public static Regex AdverbeRegex2 = new Regex(@"\{\{S\|adverbe(interrogatif|relatif)\|fr\b");
 
         //nom
         //public static Regex NomRegex = new Regex(@"\{\{S\|nom\|fr\b");
 
         public static Regex PronomRegex = new Regex(@"\{\{S\|pronom\|fr\b");
-        public static Regex PronomRegex2 = new Regex(@"\{\{S\|(pronom.(demonstratif|indefini|interrogatif|personnel|possessif|relatif))\|fr\b");
+        public static Regex PronomRegex2 = new Regex(@"\{\{S\|(pronom(demonstratif|indefini|interrogatif|personnel|possessif|relatif))\|fr\b");
         //public static Regex NomCommunRegex = new Regex(@"");
         //public static Regex NomCommunRegex = new Regex(@"");
         //public static Regex NomCommunRegex = new Regex(@"");
