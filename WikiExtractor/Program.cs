@@ -13,7 +13,28 @@ namespace WikiExtractor
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main()
+        {
+            var reader = new WikipediaReader(
+                @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream.xml.bz2",
+                @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream-index.txt"
+            );
+
+            var articleContent = reader.ExtractArticleContent("Mangue");
+            Console.WriteLine(articleContent);
+        }
+        public static void Main00()
+        {
+            var reader = new WikipediaReader1(
+                @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream.xml.bz2",
+                @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream-index.txt"
+            );
+
+            var articleContent = reader.GetArticle("Mangue");
+            Console.WriteLine(articleContent);
+        }
+
+        static void Main1(string[] args)
         {
             var articleDumpPath = @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream.xml.bz2";
             var indexPath = @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream-index.txt";
@@ -239,5 +260,7 @@ namespace WikiExtractor
                 }
             }
         }
+
+
     }
 }
