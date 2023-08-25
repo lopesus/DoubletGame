@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiExtractor", "WikiExtrac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiStreamExtractor", "MultiStreamExtractor\MultiStreamExtractor.csproj", "{E87A40F3-2319-4647-82D2-BF12D97349A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevExtensions", "DevExtensions\DevExtensions.csproj", "{E5D0A484-2AC0-49CF-9C61-CC377500ADFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{E87A40F3-2319-4647-82D2-BF12D97349A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E87A40F3-2319-4647-82D2-BF12D97349A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E87A40F3-2319-4647-82D2-BF12D97349A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5D0A484-2AC0-49CF-9C61-CC377500ADFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5D0A484-2AC0-49CF-9C61-CC377500ADFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5D0A484-2AC0-49CF-9C61-CC377500ADFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5D0A484-2AC0-49CF-9C61-CC377500ADFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

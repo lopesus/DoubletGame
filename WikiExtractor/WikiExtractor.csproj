@@ -83,7 +83,7 @@
     <Compile Include="NewFolder1\Class1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WikipediaReader.cs" />
+    <Compile Include="WikipediaReaderSingle.cs" />
     <Compile Include="WikipediaReader1.cs" />
   </ItemGroup>
   <ItemGroup>

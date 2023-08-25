@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,14 +26,42 @@ namespace MultiStreamExtractor
         {
             InitializeComponent();
 
+            //var readerSingle = new WikipediaReaderSingle(
+            //    @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream.xml.bz2",
+            //    @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream-index.txt"
+            //);
+
+            //var articleContent = readerSingle.ExtractArticleContent("Mangue");
+            //txtPage.Text = articleContent;
+            //Console.WriteLine(articleContent);
+
+
+           
+        }
+
+        private void cmdExtract_Click(object sender, RoutedEventArgs e)
+        {
+            var processAllChunk = false;
+            var artciclePerchunk = 1;
+            var savePage = true;
             var reader = new WikipediaReader(
                 @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream.xml.bz2",
-                @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream-index.txt"
+                @"D:\zzzWiktionnaire\wikipedia\frwiki-20230320-pages-articles-multistream-index.txt",
+                processAllChunk,
+                artciclePerchunk,
+                savePage
             );
 
-            var articleContent = reader.ExtractArticleContent("Mangue");
-            txtPage.Text= articleContent;
-            Console.WriteLine(articleContent);
+            var path = @"D:\zzzWiktionnaire\wikipedia\zzz_test_extraction";
+            Directory.CreateDirectory(path);
+            int numberOfCores = Environment.ProcessorCount;
+
+            Stopwatch sw = Stopwatch.StartNew();
+            reader.ExtractAndProcessArticles(path);
+            sw.Stop();
+            var elapsed = sw.Elapsed.TotalMinutes;
+
+            MessageBox.Show($"DONE IN {elapsed} min");
         }
     }
 }
