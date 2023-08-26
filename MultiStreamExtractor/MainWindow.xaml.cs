@@ -112,9 +112,9 @@ namespace MultiStreamExtractor
             var processAllChunk = true;
             var artciclePerchunk = Int32.MaxValue;// 1000;
             var savePage = false;
+            var saveToDb = true;
             var processorCount = Environment.ProcessorCount - 2;
             var checkInValidWordList = true;
-            var saveToDb = true;
 
             var reader = new WikipediaReader(
                 wiktionary,
@@ -129,13 +129,8 @@ namespace MultiStreamExtractor
                 saveToDb
             );
 
-            var path = wiktionary.GetExtractionFolder();// @"D:\zzzWiktionnaire\wikipedia\zzz_test_extraction";
-            Directory.CreateDirectory(path);
-
-            int numberOfCores = Environment.ProcessorCount;
-
             _stopwatch = Stopwatch.StartNew();
-            var result = await reader.ExtractAndProcessArticles(path);
+            var result = await reader.ExtractAndProcessArticles();
             WikiPageDataExtractor.Extract(reader.PagesList);
 
             _stopwatch.Stop();

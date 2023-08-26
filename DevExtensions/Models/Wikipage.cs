@@ -14,6 +14,7 @@ namespace WiktionaireParser.Models
     {
         [BsonId]
         public string Title { get; set; }
+        public string ArticleId { get; set; }
         public string TitleInv { get; set; }
         public string AnagramKey { get; set; }
         public int AnagramCount { get; set; }
@@ -40,8 +41,9 @@ namespace WiktionaireParser.Models
         public float Frequency { get; set; }
         public long MostFrequentWordCount { get; set; }
 
-        public WikiPage(string title, string text, SectionBuilder sectionBuilder)
+        public WikiPage(string id, string title, string text, SectionBuilder sectionBuilder)
         {
+            ArticleId=id;
             Title = title;
             TitleInv = title.ToLowerInvariant().RemoveDiacritics();
             AnagramKey = TitleInv.SortString();

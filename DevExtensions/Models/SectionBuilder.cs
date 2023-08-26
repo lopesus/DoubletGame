@@ -22,7 +22,7 @@ namespace WiktionaireParser.Models
 
         public List<string> GetFilterdSections(string languageFilter)
         {
-            var sectionList = new HashSet<string>(Sections.Where(s=>s.ContainsWholeWord(languageFilter))).ToList();
+            var sectionList = new HashSet<string>(Sections.Where(s=>s.ContainsUnhyphenatedWord(languageFilter))).ToList();
             sectionList.Sort();
             return sectionList;
         }

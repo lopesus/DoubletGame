@@ -261,6 +261,22 @@ namespace CommonLibTools.Libs.Extensions
             return Regex.IsMatch(input, $@"\b{Regex.Escape(word)}\b");
         }
 
+        /// <summary>
+        /// Checks if the input string contains the specified whole word, ensuring it's not preceded or followed by a hyphen.
+        /// </summary>
+        /// <param name="input">The string to search within.</param>
+        /// <param name="word">The whole word to search for.</param>
+        /// <returns>True if the word is found as a whole word in the input string; otherwise, false.</returns>
+        public static bool ContainsUnhyphenatedWord(this string input, string word)
+        {
+            // Use a regular expression to check for the presence of the word.
+            // (?<!-) ensures the word is not preceded by a hyphen.
+            // \b denotes a word boundary, ensuring we're matching whole words.
+            // {Regex.Escape(word)} inserts the word into the regex, escaping any special characters.
+            // (?!-) ensures the word is not followed by a hyphen.
+            return Regex.IsMatch(input, $@"(?<!-)\b{Regex.Escape(word)}\b(?!-)");
+        }
+
         public static string ReplaceWhiteSpaceRegex(this string text)
         {
             if (text != null)

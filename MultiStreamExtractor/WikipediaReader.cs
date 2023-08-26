@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Xml.Linq;
 using CommonLibTools.Libs.Extensions;
 using CommunityToolkit.Mvvm.Messaging;
@@ -29,7 +30,7 @@ public class WikipediaReader
 
     public List<WikiPage> PagesList = new List<WikiPage>();
     bool checkInValidWordList = false;
-    bool saveToDb=false;
+    bool saveToDb = false;
 
     private MultiStreamInfos multiStreamInfos;
 
@@ -51,7 +52,7 @@ public class WikipediaReader
         this.savePage = savePage;
         this.numberOfCores = numberOfCores;
         this.checkInValidWordList = checkInValidWordList;
-        this.saveToDb=saveToDb;
+        this.saveToDb = saveToDb;
         this.multiStreamInfos = multiStreamInfos;
 
         //ensure folder exist
@@ -129,22 +130,23 @@ public class WikipediaReader
                 builder.AppendLine(text);
 
                 var titleInv = title.ToLowerInvariant().RemoveDiacritics();
-                if (checkInValidWordList==false || (checkInValidWordList && officiaScrabbleWordList.ContainsKey(titleInv)))
+                if (checkInValidWordList == false || (checkInValidWordList && officiaScrabbleWordList.ContainsKey(titleInv)))
                 {
-                    var wikiPage = new WikiPage(title, text, sectionBuilder);
+                    var wikiPage = new WikiPage(id, title, text, sectionBuilder);
                     PagesList.Add(wikiPage);
-                    if (savePage)
-                    {
-                        var name = $"{title}-{id}.txt".ConvertToValidFileName();
-                        var name2 = $"{title}-{id}_full.txt".ConvertToValidFileName();
-                        var fileName = Path.Combine(rawPageFolder, name);
-                        var fileName2 = Path.Combine(rawPageFolder, $"{name2}");
 
-                        //await File.WriteAllTextAsync(fileName, builder.ToString());
-                        //await File.WriteAllTextAsync(fileName2, articleContent); 
-                        File.WriteAllText(fileName, builder.ToString());
-                        File.WriteAllText(fileName2, articleContent);
-                    }
+                    //if (savePage)
+                    //{
+                    //    var name = $"{title}-{id}.txt".ConvertToValidFileName();
+                    //    var name2 = $"{title}-{id}_full.txt".ConvertToValidFileName();
+                    //    var fileName = Path.Combine(rawPageFolder, name);
+                    //    var fileName2 = Path.Combine(rawPageFolder, $"{name2}");
+
+                    //    //await File.WriteAllTextAsync(fileName, builder.ToString());
+                    //    //await File.WriteAllTextAsync(fileName2, articleContent); 
+                    //    File.WriteAllText(fileName, builder.ToString());
+                    //    File.WriteAllText(fileName2, articleContent);
+                    //}
                 }
 
 
@@ -231,6 +233,28 @@ public class WikipediaReader
                 WikiPageDataExtractor.SaveToDb(PagesList);
             }
 
+            if (savePage)
+            {
+                var rawPageFolder = multiStreamInfos.GetRawPageFolder();
+                foreach (var wikiPage in PagesList)
+                {
+                    string title = wikiPage.Title.Trim();
+                    string text = wikiPage.Text.Trim();
+                    string id = wikiPage.ArticleId.Trim();
+                    var builder = new StringBuilder();
+                    builder.AppendLine(title);
+                    builder.AppendLine();
+                    builder.AppendLine(text);
+
+                    var name = $"{title}-{id}.txt".ConvertToValidFileName();
+                    var name2 = $"{title}-{id}_full.txt".ConvertToValidFileName();
+                    var fileName = Path.Combine(rawPageFolder, name);
+                    //var fileName2 = Path.Combine(rawPageFolder, $"{name2}");
+
+                    File.WriteAllText(fileName, builder.ToString());
+                }
+            }
+
             string path = multiStreamInfos.GetExtractionFolder();
             var sectionList = new HashSet<string>(sectionBuilder.Sections).ToList();
             sectionList.Sort();
@@ -238,7 +262,7 @@ public class WikipediaReader
 
             var languageFilter = "fr";
             sectionList = sectionBuilder.GetFilterdSections(languageFilter);
-             File.WriteAllLines($"{path}/___sectionList_filtered_{languageFilter}.txt", sectionList);
+            File.WriteAllLines($"{path}/___sectionList_filtered_{languageFilter}.txt", sectionList);
 
             sectionList = new HashSet<string>(sectionBuilder.SectionsWithNoSpace).ToList();
             sectionList.Sort();
@@ -248,6 +272,6 @@ public class WikipediaReader
         return true;
     }
 
-   
+
 
 }
