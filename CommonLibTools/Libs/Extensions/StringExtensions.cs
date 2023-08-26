@@ -256,6 +256,10 @@ namespace CommonLibTools.Libs.Extensions
             }
             return false;
         }
+        public static bool ContainsWholeWord(this string input, string word)
+        {
+            return Regex.IsMatch(input, $@"\b{Regex.Escape(word)}\b");
+        }
 
         public static string ReplaceWhiteSpaceRegex(this string text)
         {

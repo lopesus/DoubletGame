@@ -16,6 +16,7 @@
                     </Grid.RowDefinitions>
                     <TextBox x:Name="txtPage" Grid.Row="1" TextWrapping="Wrap" Text="TextBox" AcceptsTab="True" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                     <Button x:Name="cmdExtract" Content="extract multi" HorizontalAlignment="Left" Height="34" Margin="17,10,0,0" VerticalAlignment="Top" Width="95" Click="cmdExtract_Click"/>
+                    <TextBlock x:Name="tblProgress" HorizontalAlignment="Left" Height="34" Margin="132,10,0,0" TextWrapping="Wrap" Text="TextBlock" Width="585" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="TabItem">
