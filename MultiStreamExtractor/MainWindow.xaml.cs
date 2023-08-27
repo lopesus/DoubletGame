@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using CommonLibTools.Libs.Extensions;
 using MongoDB.Driver;
 using WiktionaireParser.Models;
 
@@ -36,6 +37,8 @@ namespace MultiStreamExtractor
 
         public static int MinLen = 3;
         public static int MaxLen = 7;
+
+        private string testdile = @"D:\zzzWiktionnaire\multistream\frwiktionary_parsed\bio-123248.txt";
         public MainWindow()
         {
             InitializeComponent();
@@ -61,6 +64,9 @@ namespace MultiStreamExtractor
 
             officiaScrabbleWordList = File.ReadAllLines(officialScrabbleDico).ToList().ToDictionary(s => s.ToLowerInvariant(), s => true);
 
+            ReadSectionTest();
+
+
             pagesArticlesMultistreamXmlBz2 = wiktionary.ArticlesPath;
             pagesArticlesMultistreamIndexTxt = wiktionary.IndexPath;
 
@@ -75,6 +81,24 @@ namespace MultiStreamExtractor
 
 
 
+        }
+
+        void ReadSectionTest()
+        {
+            var content = File.ReadAllText(testdile);
+           var result= ContentProcessor.ExtractLanguageSections(content);
+
+           var builder=new StringBuilder();
+           foreach (var languageSection in result)
+           {
+               builder.AppendLine(languageSection.GetContent());
+               builder.AppendLine($"########");
+           }
+           txtPage.Text= builder.ToString();
+
+           var lines = content.SplitOnNewLine().ToList();
+           var sections = WikiSectionParser.ParseWikiText(lines,0,lines.Count,2);
+           Console.WriteLine(sections);
         }
 
         private async void SetDbIndex()

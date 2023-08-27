@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CommonLibTools.Libs.Extensions
 {
@@ -698,6 +699,13 @@ namespace CommonLibTools.Libs.Extensions
 
             }
             return false;
+        }
+
+
+        public static string[] SplitOnNewLine(this string text)
+        {
+            var lines = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            return lines;
         }
     }
 }
